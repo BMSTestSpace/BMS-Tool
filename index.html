@@ -20,6 +20,7 @@
       align-items: center;
       justify-content: center;
       color: #f9fafb;
+      padding: 20px;
     }
 
     /* App Container */
@@ -44,5 +45,330 @@
     h2 {
       margin-bottom: 20px;
       font-size: 1.2rem;
+      color: #374151;
     }
 
+    .question-text {
+      font-size: 1.1rem;
+      margin-bottom: 24px;
+      line-height: 1.6;
+      color: #111827;
+    }
+
+    .diagnosis-text {
+      font-size: 1rem;
+      margin-bottom: 16px;
+      line-height: 1.6;
+      color: #374151;
+    }
+
+    .action-text {
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      padding: 12px;
+      background-color: #f3f4f6;
+      border-left: 4px solid #3b82f6;
+      border-radius: 4px;
+      color: #1f2937;
+    }
+
+    /* Button Container */
+    .button-container {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* Buttons */
+    button {
+      flex: 1;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+
+    .btn-yes {
+      background-color: #10b981;
+      color: white;
+    }
+
+    .btn-yes:hover {
+      background-color: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-yes:active {
+      transform: translateY(0);
+    }
+
+    .btn-no {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .btn-no:hover {
+      background-color: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-no:active {
+      transform: translateY(0);
+    }
+
+    .btn-back {
+      background-color: #6b7280;
+      color: white;
+      flex: 0.5;
+    }
+
+    .btn-back:hover {
+      background-color: #4b5563;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    }
+
+    .btn-back:active {
+      transform: translateY(0);
+    }
+
+    .btn-restart {
+      background-color: #3b82f6;
+      color: white;
+      width: 100%;
+      padding: 12px 24px;
+      margin-top: 16px;
+    }
+
+    .btn-restart:hover {
+      background-color: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-restart:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      animation: fadeIn 0.3s ease;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>HVAC Troubleshooter</h1>
+    <div class="breadcrumb" id="breadcrumb"></div>
+    
+    <div id="content"></div>
+  </div>
+
+  <script>
+    // Decision tree data
+    const troubleshootingData = {
+      "start": "q1",
+      "steps": {
+        "4": {
+          "question": "Is the status light solid green",
+          "answers": {
+            "yes": "q7",
+            "no": "r6"
+          }
+        },
+        "q1": {
+          "question": "Is the Panel on",
+          "answers": {
+            "yes": "q2",
+            "no": "r1"
+          }
+        },
+        "q2": {
+          "question": "Is the low voltage on?",
+          "answers": {
+            "yes": "q3",
+            "no": "r2"
+          }
+        },
+        "q3": {
+          "question": "Are there any breakers tripped",
+          "answers": {
+            "yes": "q4",
+            "no": "r3"
+          }
+        },
+        "q4": {
+          "question": "Are there any fuses?",
+          "answers": {
+            "yes": "q5",
+            "no": "r4"
+          }
+        },
+        "q5": {
+          "question": "Is the transformer tripped?",
+          "answers": {
+            "yes": "q6",
+            "no": "r5"
+          }
+        },
+        "r1": {
+          "diagnosis": "No power",
+          "action": "Check all breakers"
+        },
+        "r2": {
+          "diagnosis": "Low voltage off",
+          "action": "Turn on low voltage breaker"
+        },
+        "r3": {
+          "diagnosis": "Breakers previously tripped",
+          "action": "Confirm why breakers are tripped with a multimeter"
+        },
+        "r4": {
+          "diagnosis": "Fuses possible bad or hidden",
+          "action": "Test and/or replace fuses"
+        },
+        "r5": {
+          "diagnosis": "Transformer tripped",
+          "action": "Confirm VA on transformer and reset"
+        },
+        "q6": {
+          "diagnosis": "AS appears normal",
+          "action": "Connect to the AS"
+        }
+      }
+    };
+
+    let currentStep = troubleshootingData.start;
+    let history = [];
+
+    function isQuestion(stepId) {
+      return stepId.startsWith('q');
+    }
+
+    function isDiagnosis(stepId) {
+      return stepId.startsWith('r');
+    }
+
+    function updateBreadcrumb() {
+      const breadcrumb = document.getElementById('breadcrumb');
+      if (history.length === 0) {
+        breadcrumb.textContent = '';
+      } else {
+        breadcrumb.textContent = `Steps: ${history.length}`;
+      }
+    }
+
+    function renderQuestion(stepId) {
+      const step = troubleshootingData.steps[stepId];
+      const content = document.getElementById('content');
+      
+      let html = `
+        <div class="section">
+          <h2>Question ${history.length + 1}</h2>
+          <p class="question-text">${step.question}</p>
+          <div class="button-container">
+      `;
+
+      if (history.length > 0) {
+        html += `<button class="btn-back" onclick="goBack()">← Back</button>`;
+      }
+
+      html += `
+            <button class="btn-yes" onclick="answerQuestion('yes')">Yes</button>
+            <button class="btn-no" onclick="answerQuestion('no')">No</button>
+          </div>
+        </div>
+      `;
+
+      content.innerHTML = html;
+      updateBreadcrumb();
+    }
+
+    function renderDiagnosis(stepId) {
+      const step = troubleshootingData.steps[stepId];
+      const content = document.getElementById('content');
+      
+      let html = `
+        <div class="section">
+          <h2>Diagnosis</h2>
+          <p class="diagnosis-text"><strong>Issue:</strong> ${step.diagnosis}</p>
+          <div class="action-text">
+            <strong>Recommended Action:</strong><br>
+            ${step.action}
+          </div>
+          <div class="button-container">
+            <button class="btn-back" onclick="goBack()">← Back</button>
+            <button class="btn-restart" onclick="restart()">Restart</button>
+          </div>
+        </div>
+      `;
+
+      content.innerHTML = html;
+      updateBreadcrumb();
+    }
+
+    function answerQuestion(answer) {
+      const step = troubleshootingData.steps[currentStep];
+      history.push(currentStep);
+      currentStep = step.answers[answer];
+
+      if (isQuestion(currentStep)) {
+        renderQuestion(currentStep);
+      } else if (isDiagnosis(currentStep)) {
+        renderDiagnosis(currentStep);
+      }
+    }
+
+    function goBack() {
+      if (history.length > 0) {
+        currentStep = history.pop();
+        if (isQuestion(currentStep)) {
+          renderQuestion(currentStep);
+        } else if (isDiagnosis(currentStep)) {
+          renderDiagnosis(currentStep);
+        }
+      }
+    }
+
+    function restart() {
+      currentStep = troubleshootingData.start;
+      history = [];
+      renderQuestion(currentStep);
+    }
+
+    // Initialize
+    renderQuestion(currentStep);
+  </script>
+</body>
+</html>
