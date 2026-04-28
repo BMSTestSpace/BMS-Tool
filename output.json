@@ -52,32 +52,20 @@
       "action": "Turn on low voltage breaker"
     },
     "r3": {
-      "diagnosis": "Low suction pressure",
-      "action": "Possible refrigerant leak"
-    },
-    "r4": {
       "diagnosis": "Breakers previously tripped",
       "action": "Confirm why breakers are tripped with a multimeter"
     },
-    "r5": {
+    "r4": {
       "diagnosis": "Fuses possible bad or hidden",
       "action": "Test and/or replace fuses"
     },
-    "r6": {
+    "r5": {
       "diagnosis": "Transformer tripped ",
       "action": "Confirm VA on transformer and reset "
     },
-    "q7": {
+    "q6": {
       "diagnosis": "AS apears normal",
       "action": "Connect to the AS"
-    },
-    "q": {
-      "question": "What is the suction pressure?",
-      "answers": {
-        "low": "r3",
-        "normal": "q7",
-        "high": "r4"
-      }
     }
   }
 }
