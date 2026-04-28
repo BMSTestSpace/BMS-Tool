@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HVAC Troubleshooter</title>
+</head>
+<body>
+
+  <h1>AS-P Troubleshooter</h1>
+
+  <div id="app"></div>
+
+  <script>
+    let tree;
+    let currentStep;
+
+    // Load JSON
+    fetch("output.json")
+      .then(response => response.json())
+      .then(data => {
+        tree = data;
+        currentStep = tree.start;
+        showStep();
+      });
+
+    function showStep() {
+      const step = tree.steps[currentStep];
+      const app = document.getElementById("app");
+
+      app.innerHTML = "";
+
+      // If it's a question
+      if (step.question) {
+        const question = document.createElement("h2");
+        question.innerText = step.question;
+        app.appendChild(question);
+
+        // Create buttons
+        for (let answer in step.answers) {
+          const btn = document.createElement("button");
+          btn.innerText = answer;
+
+          btn.onclick = () => {
+            currentStep = step.answers[answer];
+            showStep();
+          };
+
+          app.appendChild(btn);
+          app.appendChild(document.createElement("br"));
+        }
+      }
+
+      // If it's a result
+      else {
+        const result = document.createElement("h2");
+        result.innerText = "Diagnosis: " + step.diagnosis;
+
+        const action = document.createElement("p");
+        action.innerText = "Action: " + step.action;
+
+        app.appendChild(result);
+        app.appendChild(action);
+      }
+    }
+  </script>
+
+</body>
+</html>
