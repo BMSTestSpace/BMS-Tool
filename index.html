@@ -1,56 +1,87 @@
-function showStep() {
-  const step = tree.steps[currentStep];
-  const app = document.getElementById("app");
-  app.innerHTML = "";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HVAC Troubleshooter</title>
 
-  // If it's a question
-  if (step.question) {
-    const question = document.createElement("h2");
-    question.innerText = step.question;
-    app.appendChild(question);
-
-    for (let answer in step.answers) {
-      const btn = document.createElement("button");
-      btn.innerText = answer;
-      btn.className = "btn";
-
-      btn.onclick = () => {
-        currentStep = step.answers[answer];
-        showStep();
-      };
-
-      app.appendChild(btn);
+  <style>
+    /* -------- RESET -------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-  }
 
-  // If it's a result
-  else {
-    const resultBox = document.createElement("div");
-    resultBox.className = "result";
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1f2933, #111827);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-    const result = document.createElement("h2");
-    result.innerText = "Diagnosis";
+    /* -------- APP CARD -------- */
+    .container {
+      width: 100%;
+      max-width: 540px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 30px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+      animation: fadeIn 0.4s ease;
+    }
 
-    const diagnosisText = document.createElement("p");
-    diagnosisText.innerText = step.diagnosis;
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #111827;
+      font-size: 1.9rem;
+    }
 
-    const actionText = document.createElement("p");
-    actionText.innerHTML = `<strong>Recommended Action:</strong> ${step.action}`;
+    h2 {
+      margin-bottom: 18px;
+      color: #1f2937;
+      font-size: 1.25rem;
+    }
 
-    const restartBtn = document.createElement("button");
-    restartBtn.innerText = "Start Over";
-    restartBtn.className = "btn";
+    p {
+      color: #374151;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
 
-    restartBtn.onclick = () => {
-      currentStep = tree.start;
-      showStep();
-    };
+    /* -------- BUTTONS -------- */
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      background-color: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+      transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    }
 
-    resultBox.appendChild(result);
-    resultBox.appendChild(diagnosisText);
-    resultBox.appendChild(actionText);
-    resultBox.appendChild(restartBtn);
+    .btn:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+    }
 
-    app.appendChild(resultBox);
-  }
-}
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn.secondary {
+      background-color: #6b7280;
+      box-shadow: 0 4px 10px rgba(107, 114, 128, 0.35);
+    }
+
+    .btn.secondary:hover {
