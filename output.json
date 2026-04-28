@@ -1,0 +1,83 @@
+{
+  "start": "q1",
+  "steps": {
+    "4": {
+      "question": "Is the status light solid green",
+      "answers": {
+        "yes": "q7",
+        "no": "r6"
+      }
+    },
+    "q1": {
+      "question": "Is the Panel on",
+      "answers": {
+        "yes": "q2",
+        "no": "r1"
+      }
+    },
+    "q2": {
+      "question": "Is the low voltage on?",
+      "answers": {
+        "yes": "q3",
+        "no": "r2"
+      }
+    },
+    "q3": {
+      "question": "Are there any breakers tripped",
+      "answers": {
+        "yes": "q4",
+        "no": "r3"
+      }
+    },
+    "q4": {
+      "question": "Are there any fuses?",
+      "answers": {
+        "yes": "q5",
+        "no": "r4"
+      }
+    },
+    "q5": {
+      "question": "Is the transformer tripped?",
+      "answers": {
+        "yes": "q6",
+        "no": "r5"
+      }
+    },
+    "r1": {
+      "diagnosis": "No power",
+      "action": "Check all breakers"
+    },
+    "r2": {
+      "diagnosis": "Low voltage off",
+      "action": "Turn on low voltage breaker"
+    },
+    "r3": {
+      "diagnosis": "Low suction pressure",
+      "action": "Possible refrigerant leak"
+    },
+    "r4": {
+      "diagnosis": "Breakers previously tripped",
+      "action": "Confirm why breakers are tripped with a multimeter"
+    },
+    "r5": {
+      "diagnosis": "Fuses possible bad or hidden",
+      "action": "Test and/or replace fuses"
+    },
+    "r6": {
+      "diagnosis": "Transformer tripped ",
+      "action": "Confirm VA on transformer and reset "
+    },
+    "q7": {
+      "diagnosis": "AS apears normal",
+      "action": "Connect to the AS"
+    },
+    "q": {
+      "question": "What is the suction pressure?",
+      "answers": {
+        "low": "r3",
+        "normal": "q7",
+        "high": "r4"
+      }
+    }
+  }
+}
