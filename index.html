@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMS Tool</title>
+    <title>Data Loader</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        async function loadTroubleshootingData() {
-            const response = await fetch('output.json');
-            const data = await response.json();
-            // Process the data as needed
-            console.log(data);
-        }
-        window.onload = loadTroubleshootingData;
+        $(document).ready(function() {
+            $.getJSON('output.json', function(data) {
+                // Process and display the data
+                console.log(data);
+                $('#data-output').html(JSON.stringify(data, null, 2));
+            });
+        });
     </script>
 </head>
 <body>
-    <h1>BMS Tool</h1>
-    <div id="troubleshooting-data"></div>
+    <h1>Data Output</h1>
+    <pre id="data-output">Loading data...</pre>
 </body>
 </html>
