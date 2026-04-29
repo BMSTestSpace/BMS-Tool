@@ -1,46 +1,68 @@
 {
   "start": "q1",
   "steps": {
-    "4": {
-      "question": "Is the status light solid green",
-      "answers": {
-        "yes": "q7",
-        "no": "r6"
-      }
-    },
     "q1": {
-      "question": "Is the Panel on",
+      "question": "What are you working on",
       "answers": {
-        "yes": "q2",
-        "no": "r1"
+        "AS": "q2",
+        "UI16": "q101",
+        "DO8": "q201",
+        "AO8": "q301",
+        "OTHER": "q401"
       }
     },
     "q2": {
-      "question": "Is the low voltage on?",
+      "question": "Is the Panel on",
       "answers": {
         "yes": "q3",
-        "no": "r2"
+        "no": "r1",
+        "back": "q1",
+        "Restart": "q1"
       }
     },
     "q3": {
-      "question": "Are there any breakers tripped",
+      "question": "Is the low voltage on?",
       "answers": {
         "yes": "q4",
-        "no": "r3"
+        "no": "r2",
+        "back": "q2",
+        "Restart": "q1"
       }
     },
     "q4": {
-      "question": "Are there any fuses?",
+      "question": "Are there any breakers tripped",
       "answers": {
-        "yes": "q5",
-        "no": "r4"
+        "no": "q5",
+        "yes": "r3",
+        "back": "q3",
+        "Restart": "q1"
       }
     },
     "q5": {
+      "question": "Are there any fuses?",
+      "answers": {
+        "no": "q6",
+        "yes": "r4",
+        "back": "q4",
+        "Restart": "q1"
+      }
+    },
+    "q6": {
       "question": "Is the transformer tripped?",
       "answers": {
-        "yes": "q6",
-        "no": "r5"
+        "no": "q7",
+        "yes": "r5",
+        "back": "q5",
+        "Restart": "q1"
+      }
+    },
+    "q7": {
+      "question": "Is the status light solid green",
+      "answers": {
+        "yes": "r6",
+        "no": "r6",
+        "back": "q6",
+        "Restart": "q1"
       }
     },
     "r1": {
@@ -63,9 +85,158 @@
       "diagnosis": "Transformer tripped ",
       "action": "Confirm VA on transformer and reset "
     },
-    "q6": {
+    "r6": {
       "diagnosis": "AS apears normal",
       "action": "Connect to the AS"
+    },
+    "q101": {
+      "question": "Is the UI16 status light solid?",
+      "answers": {
+        "yes": "q102",
+        "no": "r101",
+        "back": "q1",
+        "Restart": "q1"
+      }
+    },
+    "q102": {
+      "question": "What kind of point are you looking at",
+      "answers": {
+        "DI": "q103",
+        "AI": "q107, TEMPERATURE",
+        "back": "q101",
+        "Restart": "q1"
+      }
+    },
+    "q103": {
+      "question": "Is your DI NO or NC?",
+      "answers": {
+        "NO": "q104",
+        "NC": "q105",
+        "back": "q102",
+        "Restart": "q1"
+      }
+    },
+    "q104": {
+      "question": "Disconnect the wires and jump out the DI, did the UI come in?",
+      "answers": {
+        "yes": "q106",
+        "no": "r102",
+        "back": "q103",
+        "Restart": "q1"
+      }
+    },
+    "q105": {
+      "question": "Disconnect the wires and jump out the DI, did you lose the UI?",
+      "answers": {
+        "yes": "q106",
+        "no": "r102",
+        "back": "q104",
+        "Restart": "q1"
+      }
+    },
+    "q106": {
+      "question": "Check the field device, disconnect the wires and splice/unsplice the wires to simulate the signal changing, did you see a change?",
+      "answers": {
+        "yes": "r104",
+        "no": "r105",
+        "back": "q105",
+        "Restart": "q1"
+      }
+    },
+    "q107": {
+      "answers": {}
+    },
+    "q108": {
+      "answers": {}
+    },
+    "q109": {
+      "answers": {}
+    },
+    "q110": {
+      "answers": {}
+    },
+    "q111": {
+      "answers": {}
+    },
+    "q112": {
+      "answers": {}
+    },
+    "q113": {
+      "answers": {}
+    },
+    "q114": {
+      "answers": {}
+    },
+    "q115": {
+      "answers": {}
+    },
+    "q116": {
+      "answers": {}
+    },
+    "q117": {
+      "answers": {}
+    },
+    "q118": {
+      "answers": {}
+    },
+    "q119": {
+      "answers": {}
+    },
+    "q120": {
+      "answers": {}
+    },
+    "r101": {
+      "diagnosis": "Check connection between modules/S cable"
+    },
+    "r102": {
+      "diagnosis": "Confirm input is created, otherwise possibly a bad input, try simulating on a different UI"
+    },
+    "r103": {
+      "diagnosis": "Check the field device, if the device is able to signal on and off, tone out the wires"
+    },
+    "r104": {
+      "diagnosis": "Issue with the field device, confirm the following: power to the device, terminations, etc"
+    },
+    "r105": {
+      "diagnosis": "Either you are at the wrong device or the wires wrong at the panel, tone our wires for the device you are working on"
+    },
+    "r106": {},
+    "r107": {},
+    "r108": {},
+    "r109": {},
+    "r110": {},
+    "r111": {},
+    "r112": {},
+    "r113": {},
+    "r114": {},
+    "r115": {},
+    "r116": {},
+    "r117": {},
+    "r118": {},
+    "r119": {},
+    "r120": {},
+    "q201": {
+      "question": "Sorry not ready",
+      "answers": {
+        "low": "r3",
+        "normal": "q7",
+        "high": "r4"
+      }
+    },
+    "q301": {
+      "question": "Sorry not ready",
+      "answers": {
+        "a": "q1",
+        "b": "q1",
+        "c": "q1"
+      }
+    },
+    "q401": {
+      "question": "Sorry not ready",
+      "answers": {
+        "yes": "q1",
+        "no": "q1"
+      }
     }
   }
 }
