@@ -68,14 +68,23 @@
     "r1": {
       "diagnosis": "No power",
       "action": "Check all breakers"
+           "answers": {
+        "back": "q1",
+        "restart": "q1"
     },
     "r2": {
       "diagnosis": "Low voltage off",
       "action": "Turn on low voltage breaker"
+           "answers": {
+        "back": "q1",
+        "restart": "q1"
     },
     "r3": {
       "diagnosis": "Breakers previously tripped",
       "action": "Confirm why breakers are tripped with a multimeter"
+           "answers": {
+        "back": "q1",
+        "restart": "q1"
     },
     "r4": {
       "diagnosis": "Fuses possible bad or hidden",
