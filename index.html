@@ -1,16 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>HVAC Troubleshooter</title>
-</head>
-<body>
-
-  <h1>AS-P Troubleshooter</h1>
-
-
 
   <style>
-    /* Base Reset */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -28,7 +22,6 @@
       padding: 20px;
     }
 
-    /* App Container */
     .container {
       width: 100%;
       max-width: 520px;
@@ -37,233 +30,96 @@
       border-radius: 14px;
       padding: 30px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-      animation: fadeIn 0.4s ease;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 24px;
-      font-size: 1.8rem;
-      color: #1f2937;
+      margin-bottom: 20px;
     }
 
     h2 {
-      margin-bottom: 20px;
-      font-size: 1.2rem;
-      color: #374151;
-    }
-
-    .question-text {
-      font-size: 1.1rem;
-      margin-bottom: 24px;
-      line-height: 1.6;
-      color: #111827;
-    }
-
-    .diagnosis-text {
-      font-size: 1rem;
       margin-bottom: 16px;
-      line-height: 1.6;
-      color: #374151;
     }
 
-    .action-text {
-      font-size: 0.95rem;
-      margin-bottom: 24px;
-      padding: 12px;
-      background-color: #f3f4f6;
-      border-left: 4px solid #3b82f6;
-      border-radius: 4px;
-      color: #1f2937;
-    }
-
-    /* Button Container */
-    .button-container {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    /* Buttons */
     button {
-      flex: 1;
-      padding: 12px 24px;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
       font-size: 1rem;
+      font-weight: 600;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: 600;
-    }
-
-    .btn-yes {
-      background-color: #10b981;
-      color: white;
-    }
-
-    .btn-yes:hover {
-      background-color: #059669;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-yes:active {
-      transform: translateY(0);
-    }
-
-    .btn-no {
-      background-color: #ef4444;
-      color: white;
-    }
-
-    .btn-no:hover {
-      background-color: #dc2626;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    .btn-no:active {
-      transform: translateY(0);
-    }
-
-    .btn-back {
-      background-color: #6b7280;
-      color: white;
-      flex: 0.5;
-    }
-
-    .btn-back:hover {
-      background-color: #4b5563;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
-    }
-
-    .btn-back:active {
-      transform: translateY(0);
     }
 
     .btn-restart {
       background-color: #3b82f6;
       color: white;
-      width: 100%;
-      padding: 12px 24px;
-      margin-top: 16px;
-    }
-
-    .btn-restart:hover {
-      background-color: #2563eb;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    .btn-restart:active {
-      transform: translateY(0);
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .section {
-      animation: fadeIn 0.3s ease;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .breadcrumb {
-      font-size: 0.85rem;
-      color: #9ca3af;
-      margin-bottom: 16px;
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>BMS Troubleshooter</h1>
-    <div class="breadcrumb" id="breadcrumb"></div>
-
-
-  <div id="app"></div>
+    <div id="app"></div>
+  </div>
 
   <script>
     let tree;
     let currentStep;
 
-    // Load JSON
-  fetch("https://raw.githubusercontent.com/2abdshjb2u3obe/BMS-Tool/main/output.json")
+    fetch("https://raw.githubusercontent.com/2abdshjb2u3obe/BMS-Tool/main/output.json")
       .then(response => response.json())
       .then(data => {
         tree = data;
         currentStep = tree.start;
         showStep();
+      })
+      .catch(err => {
+        document.getElementById("app").innerText = "Failed to load data.";
+        console.error(err);
       });
 
     function showStep() {
       const step = tree.steps[currentStep];
       const app = document.getElementById("app");
-
       app.innerHTML = "";
 
-      // If it's a question
       if (step.question) {
         const question = document.createElement("h2");
         question.innerText = step.question;
         app.appendChild(question);
 
-        // Create buttons
         for (let answer in step.answers) {
           const btn = document.createElement("button");
           btn.innerText = answer;
-
           btn.onclick = () => {
             currentStep = step.answers[answer];
             showStep();
           };
-
           app.appendChild(btn);
-          app.appendChild(document.createElement("br"));
         }
-      }
+      } else {
+        const result = document.createElement("h2");
+        result.innerText = "Diagnosis: " + step.diagnosis;
 
-// After displaying a result, add a restart button
-else {
-  const result = document.createElement("h2");
-  result.innerText = "Diagnosis: " + step.diagnosis;
+        const action = document.createElement("p");
+        action.innerText = "Action: " + step.action;
 
-  const action = document.createElement("p");
-  action.innerText = "Action: " + step.action;
+        const restartBtn = document.createElement("button");
+        restartBtn.className = "btn-restart";
+        restartBtn.innerText = "Restart";
+        restartBtn.onclick = () => {
+          currentStep = tree.start;
+          showStep();
+        };
 
-  app.appendChild(result);
-  app.appendChild(action);
-
-  // Add restart button
-  const restartBtn = document.createElement("button");
-  restartBtn.className = "btn-restart";
-  restartBtn.innerText = "Restart";
-  restartBtn.onclick = () => {
-    currentStep = tree.start;
-    showStep();
-  };
-  app.appendChild(restartBtn);
-}
+        app.appendChild(result);
+        app.appendChild(action);
+        app.appendChild(restartBtn);
       }
     }
   </script>
-
 </body>
 </html>
