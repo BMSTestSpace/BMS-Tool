@@ -103,7 +103,7 @@
       "answers": {
         "DI": "q103",
         "AI": "q107",
-        "TEMPERATURE": "q101",
+        "TEMPERATURE": "q112",
         "back": "q101",
         "Restart": "q1"
       }
