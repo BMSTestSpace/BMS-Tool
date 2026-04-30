@@ -240,16 +240,27 @@
         }
       }
 
-      // If it's a result
-      else {
-        const result = document.createElement("h2");
-        result.innerText = "Diagnosis: " + step.diagnosis;
+// After displaying a result, add a restart button
+else {
+  const result = document.createElement("h2");
+  result.innerText = "Diagnosis: " + step.diagnosis;
 
-        const action = document.createElement("p");
-        action.innerText = "Action: " + step.action;
+  const action = document.createElement("p");
+  action.innerText = "Action: " + step.action;
 
-        app.appendChild(result);
-        app.appendChild(action);
+  app.appendChild(result);
+  app.appendChild(action);
+
+  // Add restart button
+  const restartBtn = document.createElement("button");
+  restartBtn.className = "btn-restart";
+  restartBtn.innerText = "Restart";
+  restartBtn.onclick = () => {
+    currentStep = tree.start;
+    showStep();
+  };
+  app.appendChild(restartBtn);
+}
       }
     }
   </script>
