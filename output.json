@@ -102,7 +102,8 @@
       "question": "What kind of point are you looking at",
       "answers": {
         "DI": "q103",
-        "AI": "q107, TEMPERATURE",
+        "AI": "q107",
+        "TEMPERATURE": "q101",
         "back": "q101",
         "Restart": "q1"
       }
@@ -144,21 +145,52 @@
       }
     },
     "q107": {
-      "answers": {}
+      "question": "What kind of signal are you receiving?",
+      "answers": {
+        "4-20mA": "q108",
+        "0/2-10VDC": "q101",
+        "back": "q105",
+        "Restart": "q1"
+      }
     },
     "q108": {
-      "answers": {}
+      "question": "Is this a loop sensor (2 wire) or 3 wire sensor?",
+      "answers": {
+        "2 wire": "q109",
+        "3-wire": "q110",
+        "back": "q105",
+        "Restart": "q1"
+      }
     },
     "q109": {
-      "answers": {}
+      "question": "Is DC power on?",
+      "answers": {
+        "yes": "q110",
+        "no": "r106",
+        "back": "q1",
+        "Restart": "q1"
+      }
     },
     "q110": {
-      "answers": {}
+      "question": "Is your device in field AC or DC powered?",
+      "answers": {
+        "AC": "q111",
+        "DC": "q109",
+        "back": "q1",
+        "Restart": "q1"
+      }
     },
     "q111": {
-      "answers": {}
+      "question": "Is AC power on?",
+      "answers": {
+        "yes": "q112",
+        "no": "r106",
+        "back": "q1",
+        "Restart": "q1"
+      }
     },
     "q112": {
+      "question": "Is the point terminated",
       "answers": {}
     },
     "q113": {
@@ -200,7 +232,9 @@
     "r105": {
       "diagnosis": "Either you are at the wrong device or the wires wrong at the panel, tone our wires for the device you are working on"
     },
-    "r106": {},
+    "r106": {
+      "diagnosis": "Turn on DC power and check all breakers/fuses"
+    },
     "r107": {},
     "r108": {},
     "r109": {},
