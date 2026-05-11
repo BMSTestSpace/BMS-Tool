@@ -489,7 +489,8 @@
 
 <script>
 // ─── Supabase config ──────────────────────────────────────────────────────────
-const SB_URL = "https://emkehdoofgaztuqmuyxw.supabase.co/rest/v1/";
+
+const SB_URL = "https://emkehdoofgaztuqmuyxw.supabase.co";
 const SB_KEY = "sb_publishable_I1VLxzwJrumRfOoAbdIyCw_ZEG4u2hl";
 
 async function sbInsert(row) {
@@ -503,9 +504,16 @@ async function sbInsert(row) {
     },
     body: JSON.stringify(row)
   });
-  if (!res.ok) throw new Error(await res.text());
+
+  if (!res.ok) {
+    const err = await res.text();
+    console.error("Supabase error:", err);
+    throw new Error(err);
+  }
+
   return res.json();
 }
+
 
 // ─── User identity ────────────────────────────────────────────────────────────
 let currentUser = null;   // { name, email }
