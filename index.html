@@ -29,6 +29,131 @@
       --sans: 'IBM Plex Sans', sans-serif;
     }
 
+    /* ── Login modal ── */
+    #login-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(10, 12, 18, 0.92);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #login-overlay.hidden { display: none; }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 32px 28px;
+      width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .login-logo {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
+    }
+
+    .login-logo-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      padding: 2px 7px;
+    }
+
+    .login-logo-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .login-heading {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .login-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .login-field label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .login-field input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 9px 12px;
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .login-field input:focus { border-color: var(--accent); }
+    .login-field input::placeholder { color: var(--text-dim); }
+
+    .login-error {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--red);
+      margin-bottom: 10px;
+      min-height: 14px;
+    }
+
+    .login-submit {
+      width: 100%;
+      padding: 10px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 5px;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 4px;
+    }
+    .login-submit:hover { background: #26396a; }
+    .login-submit:disabled { opacity: 0.5; cursor: default; }
+
+    /* ── Save status toast ── */
+    #save-toast {
+      position: fixed;
+      bottom: 20px; right: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+    #save-toast.show { opacity: 1; transform: translateY(0); }
+    #save-toast.ok { color: var(--green); border-color: var(--green-dim); }
+    #save-toast.err { color: var(--red); }
+
     body {
       font-family: var(--sans);
       background: var(--bg);
@@ -316,10 +441,35 @@
 </head>
 <body>
 
+<!-- Login overlay -->
+<div id="login-overlay">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="login-logo-badge">BMS</span>
+      <span class="login-logo-title">Troubleshooter</span>
+    </div>
+    <div class="login-heading">identify yourself to continue</div>
+    <div class="login-field">
+      <label>Name</label>
+      <input type="text" id="login-name" placeholder="Jane Smith" autocomplete="name" />
+    </div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="jane@company.com" autocomplete="email" />
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <button class="login-submit" id="login-btn" onclick="submitLogin()">start session →</button>
+  </div>
+</div>
+
+<!-- Save status toast -->
+<div id="save-toast"></div>
+
 <header>
   <span class="header-badge">BMS</span>
   <h1>Troubleshooter</h1>
-  <div class="status-dot"></div>
+  <div id="user-chip" style="margin-left:auto;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--text-muted);"></div>
+  <div class="status-dot" style="margin-left:0"></div>
 </header>
 
 <div class="main">
@@ -338,6 +488,99 @@
 </div>
 
 <script>
+// ─── Supabase config ──────────────────────────────────────────────────────────
+const SB_URL = "https://ylyjwulpcwsrmtrhkzet.supabase.co";
+const SB_KEY = "sb_publishable_4vRwHk-dWM9Qn6vmk1Fszw_TSleE_IY";
+
+async function sbInsert(row) {
+  const res = await fetch(`${SB_URL}/rest/v1/bms_sessions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(row)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ─── User identity ────────────────────────────────────────────────────────────
+let currentUser = null;   // { name, email }
+let sessionStart = null;
+
+function submitLogin() {
+  const name  = document.getElementById('login-name').value.trim();
+  const email = document.getElementById('login-email').value.trim();
+  const err   = document.getElementById('login-error');
+
+  if (!name) { err.textContent = 'name is required'; return; }
+  if (!email || !email.includes('@')) { err.textContent = 'valid email is required'; return; }
+
+  currentUser  = { name, email };
+  sessionStart = new Date().toISOString();
+  document.getElementById('login-overlay').classList.add('hidden');
+  document.getElementById('user-chip').textContent = name;
+
+  // persist across restart within same tab
+  sessionStorage.setItem('bms_user', JSON.stringify(currentUser));
+}
+
+// Restore from sessionStorage so page refresh doesn't re-prompt
+(function restoreUser() {
+  const saved = sessionStorage.getItem('bms_user');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      sessionStart = new Date().toISOString();
+      document.getElementById('login-overlay').classList.add('hidden');
+      document.getElementById('user-chip').textContent = currentUser.name;
+    } catch(_) {}
+  }
+})();
+
+// Allow Enter key in login form
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !document.getElementById('login-overlay').classList.contains('hidden')) {
+    submitLogin();
+  }
+});
+
+// ─── Toast helper ─────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('save-toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// ─── Save session to Supabase ─────────────────────────────────────────────────
+async function saveSession(resultStep) {
+  if (!currentUser) return;
+  const deviceAnswer = history[0]?.answer || null;
+  try {
+    await sbInsert({
+      user_name:    currentUser.name,
+      user_email:   currentUser.email,
+      device_type:  deviceAnswer,
+      diagnosis:    resultStep.diagnosis || null,
+      action:       resultStep.action    || null,
+      result_id:    current,
+      path:         history,
+      step_count:   history.length,
+      completed_at: new Date().toISOString()
+    });
+    showToast('✓ session saved', 'ok');
+  } catch (e) {
+    console.error('Supabase save failed:', e);
+    showToast('⚠ save failed — check console', 'err');
+  }
+}
+
 // ─── Load data ────────────────────────────────────────────────────────────────
 const DATA_URL = "https://raw.githubusercontent.com/2abdshjb2u3obe/BMS-Tool/main/output.json";
 
@@ -572,7 +815,9 @@ function renderQuestion() {
       panel.appendChild(row);
     }
   } else {
-    // Result
+    // Result — save to Supabase
+    saveSession(step);
+
     const box = document.createElement('div');
     box.className = 'result-box';
 
