@@ -103,7 +103,7 @@
       "answers": {
         "DI": "q103",
         "AI": "q107",
-        "TEMPERATURE": "q112",
+        "TEMPERATURE": "q113",
         "back": "q101",
         "Restart": "q1"
       }
@@ -148,7 +148,7 @@
       "question": "What kind of signal are you receiving?",
       "answers": {
         "4-20mA": "q108",
-        "0/2-10VDC": "q101",
+        "0/2-10VDC": "q114",
         "back": "q105",
         "Restart": "q1"
       }
@@ -181,22 +181,35 @@
       }
     },
     "q111": {
-      "question": "Is AC power on?",
+      "question": "Is AC power on from the breakers and transformer? Test with a meter",
       "answers": {
         "yes": "q112",
-        "no": "r106",
+        "no": "r107",
         "back": "q1",
         "Restart": "q1"
       }
     },
     "q112": {
-      "question": "Is the point terminated",
-      "answers": {}
+      "question": "Are receiving signal from the device to the BMS panel when we disconnect the signal wire and read with a meter?",
+      "answers": {
+        "yes": "r102",
+        "no": "r103",
+        "back": "q1",
+        "Restart": "q1"
+      }
     },
     "q113": {
-      "answers": {}
+      "question": "What are we reading?",
+      "answers": {
+        "32degF": "r108",
+        "value slightly inaccurate": "r109",
+        "Value extremely high": "r110",
+        "back": "q1",
+        "Restart": "q1"
+      }
     },
     "q114": {
+      "question": "Test",
       "answers": {}
     },
     "q115": {
@@ -235,10 +248,21 @@
     "r106": {
       "diagnosis": "Turn on DC power and check all breakers/fuses"
     },
-    "r107": {},
-    "r108": {},
-    "r109": {},
-    "r110": {},
+    "r107": {
+      "diagnosis": "Confirm why AC power is off by testing with a multimeter and ensure that power is turned on prior to moving on"
+    },
+    "r108": {
+      "diagnosis": "Point not reading at all",
+      "action": "Confirm if device is terminated to correct UI and in the field "
+    },
+    "r109": {
+      "diagnosis": "See below",
+      "action": "Continuity test wires to confim wire and ensure there is no short on wire"
+    },
+    "r110": {
+      "diagnosis": "There is a short on the wire causing a false reading",
+      "action": "Find where short is, test at panel and device."
+    },
     "r111": {},
     "r112": {},
     "r113": {},
@@ -252,9 +276,9 @@
     "q201": {
       "question": "Sorry not ready",
       "answers": {
-        "low": "r3",
-        "normal": "q7",
-        "high": "r4"
+        "<40": "r3",
+        "40-70": "q7",
+        ">70": "r4"
       }
     },
     "q301": {
