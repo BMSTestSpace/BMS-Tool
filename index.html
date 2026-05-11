@@ -10,21 +10,21 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0e1117;
-      --surface: #161b24;
-      --surface2: #1c2333;
-      --border: #2a3244;
-      --border-bright: #3a4a66;
-      --text: #cdd6f4;
-      --text-muted: #6e7fa8;
-      --text-dim: #3d4f72;
-      --accent: #89b4fa;
-      --accent-dim: #1e2d4a;
-      --green: #a6e3a1;
-      --green-dim: #1a2e1a;
-      --amber: #f9e2af;
-      --amber-dim: #2e2210;
-      --red: #f38ba8;
+      --bg: #f0f2f5;
+      --surface: #ffffff;
+      --surface2: #f5f7fa;
+      --border: #dde1ea;
+      --border-bright: #b0bcd4;
+      --text: #1a2233;
+      --text-muted: #5a6a8a;
+      --text-dim: #a0aabb;
+      --accent: #16a34a;
+      --accent-dim: #dcfce7;
+      --green: #22c55e;
+      --green-dim: #dcfce7;
+      --amber: #d97706;
+      --amber-dim: #fef3c7;
+      --red: #ef4444;
       --mono: 'IBM Plex Mono', monospace;
       --sans: 'IBM Plex Sans', sans-serif;
     }
@@ -32,7 +32,7 @@
     /* ── Login modal ── */
     #login-overlay {
       position: fixed; inset: 0; z-index: 999;
-      background: rgba(10, 12, 18, 0.92);
+      background: rgba(200, 210, 225, 0.85);
       display: flex; align-items: center; justify-content: center;
     }
     #login-overlay.hidden { display: none; }
@@ -198,7 +198,7 @@
       height: 7px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 6px var(--green);
+      box-shadow: 0 0 8px var(--green);
       margin-left: auto;
       animation: pulse 2.4s ease-in-out infinite;
     }
@@ -489,7 +489,6 @@
 
 <script>
 // ─── Supabase config ──────────────────────────────────────────────────────────
-
 const SB_URL = "https://emkehdoofgaztuqmuyxw.supabase.co";
 const SB_KEY = "sb_publishable_I1VLxzwJrumRfOoAbdIyCw_ZEG4u2hl";
 
@@ -513,7 +512,6 @@ async function sbInsert(row) {
 
   return res.json();
 }
-
 
 // ─── User identity ────────────────────────────────────────────────────────────
 let currentUser = null;   // { name, email }
@@ -693,10 +691,10 @@ function renderFlow() {
       <path d="M2 1L8 5L2 9" fill="none" stroke="#3a4a66" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
     <marker id="arr-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M2 1L8 5L2 9" fill="none" stroke="#a6e3a1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
     <marker id="arr-current" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M2 1L8 5L2 9" fill="none" stroke="#89b4fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
   </defs>`;
 
@@ -710,14 +708,14 @@ function renderFlow() {
     const key = from + '→' + to;
     const isActive = activeEdges.has(key);
     const isCurrent = from === current || to === current;
-    const stroke = isActive ? '#a6e3a1' : isCurrent ? '#89b4fa' : '#2a3244';
+    const stroke = isActive ? '#16a34a' : isCurrent ? '#16a34a' : '#dde1ea';
     const marker = isActive ? 'arr-active' : isCurrent ? 'arr-current' : 'arr';
     const sw = isActive ? 1.5 : 0.8;
     const opacity = isActive ? 1 : (visitedSet.has(from) || to === current ? 0.6 : 0.3);
     html += `<path d="M${x1} ${y1} C${x1} ${my+8},${x2} ${my-8},${x2} ${y2}" fill="none" stroke="${stroke}" stroke-width="${sw}" marker-end="url(#${marker})" opacity="${opacity}"/>`;
     if (label) {
       const lx = (x1 + x2) / 2 + 3, ly = my;
-      html += `<text x="${lx}" y="${ly}" font-family="IBM Plex Mono,monospace" font-size="9" fill="${isActive ? '#a6e3a1' : '#3a4a66'}">${truncate(label, 7)}</text>`;
+      html += `<text x="${lx}" y="${ly}" font-family="IBM Plex Mono,monospace" font-size="9" fill="${isActive ? '#16a34a' : '#b0bcd4'}">${truncate(label, 7)}</text>`;
     }
   });
 
@@ -731,13 +729,13 @@ function renderFlow() {
 
     let fill, stroke, textColor, sw;
     if (isCurrent) {
-      fill = '#1e2d4a'; stroke = '#89b4fa'; textColor = '#89b4fa'; sw = 1.5;
+      fill = '#dcfce7'; stroke = '#16a34a'; textColor = '#16a34a'; sw = 1.5;
     } else if (isVisited) {
-      fill = '#1a2e1a'; stroke = '#a6e3a1'; textColor = '#a6e3a1'; sw = 1;
+      fill = '#dcfce7'; stroke = '#16a34a'; textColor = '#16a34a'; sw = 1;
     } else if (isResult) {
-      fill = '#1c1c1c'; stroke = '#3a4a66'; textColor = '#6e7fa8'; sw = 0.5;
+      fill = '#1c1c1c'; stroke = '#b0bcd4'; textColor = '#5a6a8a'; sw = 0.5;
     } else {
-      fill = '#161b24'; stroke = '#2a3244'; textColor = '#3d4f72'; sw = 0.5;
+      fill = '#ffffff'; stroke = '#dde1ea'; textColor = '#a0aabb'; sw = 0.5;
     }
 
     const label = s.question ? truncate(s.question, 18) : (s.diagnosis ? truncate(s.diagnosis, 18) : id);
