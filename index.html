@@ -2,124 +2,632 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HVAC Troubleshooter</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BMS Troubleshooter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e1117;
+      --surface: #161b24;
+      --surface2: #1c2333;
+      --border: #2a3244;
+      --border-bright: #3a4a66;
+      --text: #cdd6f4;
+      --text-muted: #6e7fa8;
+      --text-dim: #3d4f72;
+      --accent: #89b4fa;
+      --accent-dim: #1e2d4a;
+      --green: #a6e3a1;
+      --green-dim: #1a2e1a;
+      --amber: #f9e2af;
+      --amber-dim: #2e2210;
+      --red: #f38ba8;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
     }
 
     body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      background: linear-gradient(135deg, #1f2933, #111827);
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      justify-content: center;
-      color: #f9fafb;
-      padding: 20px;
+      gap: 12px;
+      background: var(--surface);
     }
 
-    .container {
+    .header-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      padding: 2px 7px;
+      text-transform: uppercase;
+    }
+
+    header h1 {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      margin-left: auto;
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 49px);
+    }
+
+    /* Flow panel */
+    .flow-panel {
+      border-right: 1px solid var(--border);
+      overflow: auto;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .flow-panel-label {
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      padding: 8px 14px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+    }
+
+    #flow-container {
+      padding: 16px;
+    }
+
+    #flow-svg {
+      display: block;
+      overflow: visible;
+    }
+
+    /* Question panel */
+    .q-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .q-panel-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+    }
+
+    .q-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+    }
+
+    .step-counter {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .q-text {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .ans-btn {
       width: 100%;
-      max-width: 520px;
-      background: #ffffff;
-      color: #111827;
-      border-radius: 14px;
-      padding: 30px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface2);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      text-align: left;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
+    .ans-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
     }
 
-    h2 {
+    .ans-btn::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .ans-btn:hover::before { background: var(--accent); }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 10px 0;
+    }
+
+    .nav-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .nav-btn:hover { border-color: var(--border-bright); color: var(--text); }
+
+    /* Result */
+    .result-box {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
       margin-bottom: 16px;
     }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+    .result-section {
+      padding: 12px 14px;
     }
 
-    .btn-restart {
-      background-color: #3b82f6;
-      color: white;
+    .result-section + .result-section {
+      border-top: 1px solid var(--border);
     }
+
+    .result-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .result-diag {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--amber);
+    }
+
+    .result-action {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .restart-btn {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.04em;
+    }
+
+    .restart-btn:hover {
+      border-color: var(--border-bright);
+      color: var(--text);
+    }
+
+    /* History breadcrumb */
+    .history-trail {
+      padding: 0 16px 0;
+      border-bottom: 1px solid var(--border);
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      overflow: hidden;
+    }
+
+    .crumb {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .crumb-sep {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .crumb.active { color: var(--accent); }
+
+    /* SVG node styles */
+    .flow-node { cursor: pointer; }
+    .flow-node rect { transition: filter 0.15s; }
+    .flow-node:hover rect { filter: brightness(1.15); }
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <h1>BMS Troubleshooter</h1>
-    <div id="app"></div>
+
+<header>
+  <span class="header-badge">BMS</span>
+  <h1>Troubleshooter</h1>
+  <div class="status-dot"></div>
+</header>
+
+<div class="main">
+  <div class="flow-panel">
+    <div class="flow-panel-label">diagnostic tree</div>
+    <div id="flow-container">
+      <svg id="flow-svg"></svg>
+    </div>
   </div>
 
-  <script>
-    let tree;
-    let currentStep;
+  <div class="q-panel">
+    <div class="q-panel-label">current step</div>
+    <div class="history-trail" id="history-trail"></div>
+    <div class="q-content" id="q-content"></div>
+  </div>
+</div>
 
-    fetch("https://raw.githubusercontent.com/2abdshjb2u3obe/BMS-Tool/main/output.json")
-      .then(response => response.json())
-      .then(data => {
-        tree = data;
-        currentStep = tree.start;
-        showStep();
-      })
-      .catch(err => {
-        document.getElementById("app").innerText = "Failed to load data.";
-        console.error(err);
-      });
+<script>
+// ─── Load data ────────────────────────────────────────────────────────────────
+const DATA_URL = "https://raw.githubusercontent.com/2abdshjb2u3obe/BMS-Tool/main/output.json";
 
-    function showStep() {
-      const step = tree.steps[currentStep];
-      const app = document.getElementById("app");
-      app.innerHTML = "";
+let tree = null;
+let current = null;
+let history = [];
+const NAV_KEYS = ['back', 'Restart'];
 
-      if (step.question) {
-        const question = document.createElement("h2");
-        question.innerText = step.question;
-        app.appendChild(question);
+fetch(DATA_URL)
+  .then(r => r.json())
+  .then(data => {
+    tree = data;
+    current = tree.start;
+    render();
+  })
+  .catch(() => {
+    // Fallback inline data if fetch fails
+    tree = {"start":"q1","steps":{"q1":{"question":"What are you working on?","answers":{"AS":"q2","UI16":"q101","DO8":"q201","AO8":"q301","OTHER":"q401"}},"q2":{"question":"Is the Panel on?","answers":{"yes":"q3","no":"r1","back":"q1","Restart":"q1"}},"q3":{"question":"Is the low voltage on?","answers":{"yes":"q4","no":"r2","back":"q2","Restart":"q1"}},"q4":{"question":"Any breakers tripped?","answers":{"no":"q5","yes":"r3","back":"q3","Restart":"q1"}},"q5":{"question":"Any fuses?","answers":{"no":"q6","yes":"r4","back":"q4","Restart":"q1"}},"q6":{"question":"Is the transformer tripped?","answers":{"no":"q7","yes":"r5","back":"q5","Restart":"q1"}},"q7":{"question":"Status light solid green?","answers":{"yes":"r6","no":"r6","back":"q6","Restart":"q1"}},"r1":{"diagnosis":"No power","action":"Check all breakers"},"r2":{"diagnosis":"Low voltage off","action":"Turn on low voltage breaker"},"r3":{"diagnosis":"Breakers tripped","action":"Confirm why with a multimeter"},"r4":{"diagnosis":"Fuses possibly bad","action":"Test and/or replace fuses"},"r5":{"diagnosis":"Transformer tripped","action":"Confirm VA and reset"},"r6":{"diagnosis":"AS appears normal","action":"Connect to the AS"},"q101":{"question":"Is the UI16 status light solid?","answers":{"yes":"q102","no":"r101","back":"q1","Restart":"q1"}},"q102":{"question":"What kind of point?","answers":{"DI":"q103","AI":"q107","TEMPERATURE":"q113","back":"q101","Restart":"q1"}},"q103":{"question":"Is your DI NO or NC?","answers":{"NO":"q104","NC":"q105","back":"q102","Restart":"q1"}},"q104":{"question":"Jump out DI — UI come in?","answers":{"yes":"q106","no":"r102","back":"q103","Restart":"q1"}},"q105":{"question":"Jump out DI — lose the UI?","answers":{"yes":"q106","no":"r102","back":"q104","Restart":"q1"}},"q106":{"question":"Splice/unsplice wires — see a change?","answers":{"yes":"r104","no":"r105","back":"q105","Restart":"q1"}},"q107":{"question":"What kind of signal?","answers":{"4-20mA":"q108","0/2-10VDC":"q114","back":"q105","Restart":"q1"}},"q108":{"question":"2-wire loop or 3-wire sensor?","answers":{"2 wire":"q109","3-wire":"q110","back":"q105","Restart":"q1"}},"q109":{"question":"Is DC power on?","answers":{"yes":"q110","no":"r106","back":"q1","Restart":"q1"}},"q110":{"question":"Device AC or DC powered?","answers":{"AC":"q111","DC":"q109","back":"q1","Restart":"q1"}},"q111":{"question":"AC power on from breakers/transformer?","answers":{"yes":"q112","no":"r107","back":"q1","Restart":"q1"}},"q112":{"question":"Signal at BMS panel when wire disconnected?","answers":{"yes":"r102","no":"r103","back":"q1","Restart":"q1"}},"q113":{"question":"What are we reading?","answers":{"32degF":"r108","slightly inaccurate":"r109","extremely high":"r110","back":"q1","Restart":"q1"}},"q114":{"question":"0/2-10VDC — coming soon","answers":{"back":"q107","Restart":"q1"}},"r101":{"diagnosis":"Check S-cable / module connections","action":"Inspect connections between modules"},"r102":{"diagnosis":"Confirm input is created","action":"Try simulating on a different UI input"},"r103":{"diagnosis":"Check field device","action":"If device can signal, tone out the wires"},"r104":{"diagnosis":"Issue with field device","action":"Confirm power, terminations, etc."},"r105":{"diagnosis":"Wrong device or wrong wires","action":"Tone out wires for the device you are working on"},"r106":{"diagnosis":"DC power off","action":"Turn on DC power, check breakers/fuses"},"r107":{"diagnosis":"AC power off","action":"Test with multimeter, restore power before continuing"},"r108":{"diagnosis":"Point not reading","action":"Confirm device is on correct UI and terminated in field"},"r109":{"diagnosis":"Slight inaccuracy","action":"Continuity test wires for shorts"},"r110":{"diagnosis":"Short on wire — false high reading","action":"Find short, test at panel and device"},"q201":{"question":"DO8 — coming soon","answers":{"back":"q1","Restart":"q1"}},"q301":{"question":"AO8 — coming soon","answers":{"back":"q1","Restart":"q1"}},"q401":{"question":"Other — coming soon","answers":{"back":"q1","Restart":"q1"}}}};
+    current = tree.start;
+    render();
+  });
 
-        for (let answer in step.answers) {
-          const btn = document.createElement("button");
-          btn.innerText = answer;
-          btn.onclick = () => {
-            currentStep = step.answers[answer];
-            showStep();
-          };
-          app.appendChild(btn);
+// ─── Layout engine ────────────────────────────────────────────────────────────
+const NODE_W = 124, NODE_H = 36, GAP_X = 44, GAP_Y = 24;
+
+function buildLayout() {
+  const cols = {}, rows = {}, visited = new Set();
+  const edges = [];
+
+  function bfs() {
+    const queue = [{ id: tree.start, col: 0, row: 0 }];
+    const placed = {};
+    const colCounters = {};
+
+    while (queue.length) {
+      const { id, col, row } = queue.shift();
+      if (visited.has(id)) continue;
+      visited.add(id);
+
+      if (!(col in colCounters)) colCounters[col] = row;
+      const r = Math.max(colCounters[col], row);
+      colCounters[col] = r + 1;
+
+      cols[id] = col;
+      rows[id] = r;
+      placed[id] = true;
+
+      const s = tree.steps[id];
+      if (!s) continue;
+      const nexts = Object.entries(s.answers || {}).filter(([k]) => !NAV_KEYS.includes(k));
+      const offset = -(nexts.length - 1) / 2;
+      nexts.forEach(([label, nid], i) => {
+        if (nid && tree.steps[nid]) {
+          edges.push({ from: id, to: nid, label: nexts.length > 1 ? label : '' });
+          if (!visited.has(nid)) {
+            queue.push({ id: nid, col: col + Math.round(offset + i), row: r + 1 });
+          }
         }
-      } else {
-        const result = document.createElement("h2");
-        result.innerText = "Diagnosis: " + step.diagnosis;
-
-        const action = document.createElement("p");
-        action.innerText = "Action: " + step.action;
-
-        const restartBtn = document.createElement("button");
-        restartBtn.className = "btn-restart";
-        restartBtn.innerText = "Restart";
-        restartBtn.onclick = () => {
-          currentStep = tree.start;
-          showStep();
-        };
-
-        app.appendChild(result);
-        app.appendChild(action);
-        app.appendChild(restartBtn);
-      }
+      });
     }
-  </script>
+  }
+
+  bfs();
+
+  const allCols = Object.values(cols);
+  const allRows = Object.values(rows);
+  const minCol = Math.min(...allCols);
+  const maxCol = Math.max(...allCols);
+  const maxRow = Math.max(...allRows);
+
+  const layout = {};
+  Object.keys(cols).forEach(id => {
+    const c = cols[id] - minCol;
+    const r = rows[id];
+    layout[id] = {
+      x: c * (NODE_W + GAP_X) + 16,
+      y: r * (NODE_H + GAP_Y) + 16,
+      w: NODE_W,
+      h: NODE_H
+    };
+  });
+
+  const totalW = (maxCol - minCol + 1) * (NODE_W + GAP_X) + 32;
+  const totalH = (maxRow + 1) * (NODE_H + GAP_Y) + 32;
+  return { layout, edges, totalW, totalH };
+}
+
+// ─── SVG renderer ─────────────────────────────────────────────────────────────
+function renderFlow() {
+  const { layout, edges, totalW, totalH } = buildLayout();
+  const svg = document.getElementById('flow-svg');
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', totalH);
+  svg.style.minWidth = totalW + 'px';
+
+  const visitedSet = new Set(history.map(h => h.stepId));
+  const activeEdges = new Set(history.map(h => h.stepId + '→' + h.nextId));
+
+  let html = `<defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#3a4a66" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#a6e3a1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-current" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#89b4fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>`;
+
+  // Edges
+  edges.forEach(({ from, to, label }) => {
+    const fp = layout[from], tp = layout[to];
+    if (!fp || !tp) return;
+    const x1 = fp.x + fp.w / 2, y1 = fp.y + fp.h;
+    const x2 = tp.x + tp.w / 2, y2 = tp.y;
+    const my = (y1 + y2) / 2;
+    const key = from + '→' + to;
+    const isActive = activeEdges.has(key);
+    const isCurrent = from === current || to === current;
+    const stroke = isActive ? '#a6e3a1' : isCurrent ? '#89b4fa' : '#2a3244';
+    const marker = isActive ? 'arr-active' : isCurrent ? 'arr-current' : 'arr';
+    const sw = isActive ? 1.5 : 0.8;
+    const opacity = isActive ? 1 : (visitedSet.has(from) || to === current ? 0.6 : 0.3);
+    html += `<path d="M${x1} ${y1} C${x1} ${my+8},${x2} ${my-8},${x2} ${y2}" fill="none" stroke="${stroke}" stroke-width="${sw}" marker-end="url(#${marker})" opacity="${opacity}"/>`;
+    if (label) {
+      const lx = (x1 + x2) / 2 + 3, ly = my;
+      html += `<text x="${lx}" y="${ly}" font-family="IBM Plex Mono,monospace" font-size="9" fill="${isActive ? '#a6e3a1' : '#3a4a66'}">${truncate(label, 7)}</text>`;
+    }
+  });
+
+  // Nodes
+  Object.entries(layout).forEach(([id, pos]) => {
+    const s = tree.steps[id];
+    if (!s) return;
+    const isCurrent = id === current;
+    const isVisited = visitedSet.has(id);
+    const isResult = s.diagnosis !== undefined;
+
+    let fill, stroke, textColor, sw;
+    if (isCurrent) {
+      fill = '#1e2d4a'; stroke = '#89b4fa'; textColor = '#89b4fa'; sw = 1.5;
+    } else if (isVisited) {
+      fill = '#1a2e1a'; stroke = '#a6e3a1'; textColor = '#a6e3a1'; sw = 1;
+    } else if (isResult) {
+      fill = '#1c1c1c'; stroke = '#3a4a66'; textColor = '#6e7fa8'; sw = 0.5;
+    } else {
+      fill = '#161b24'; stroke = '#2a3244'; textColor = '#3d4f72'; sw = 0.5;
+    }
+
+    const label = s.question ? truncate(s.question, 18) : (s.diagnosis ? truncate(s.diagnosis, 18) : id);
+    html += `<g class="flow-node" onclick="jumpTo('${id}')">
+      <rect x="${pos.x}" y="${pos.y}" width="${pos.w}" height="${pos.h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
+      <text x="${pos.x + pos.w / 2}" y="${pos.y + pos.h / 2}" text-anchor="middle" dominant-baseline="central" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="${isCurrent ? 500 : 400}" fill="${textColor}">${label}</text>
+    </g>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+// ─── Question panel ───────────────────────────────────────────────────────────
+function renderQuestion() {
+  const panel = document.getElementById('q-content');
+  const trail = document.getElementById('history-trail');
+  const step = tree.steps[current];
+  panel.innerHTML = '';
+
+  // Breadcrumb trail
+  trail.innerHTML = '';
+  history.forEach((h, i) => {
+    const c = document.createElement('span');
+    c.className = 'crumb';
+    c.textContent = h.answer;
+    trail.appendChild(c);
+    const sep = document.createElement('span');
+    sep.className = 'crumb-sep';
+    sep.textContent = ' › ';
+    trail.appendChild(sep);
+  });
+  if (history.length) {
+    const cur = document.createElement('span');
+    cur.className = 'crumb active';
+    cur.textContent = current;
+    trail.appendChild(cur);
+  }
+
+  // Step counter
+  const sc = document.createElement('div');
+  sc.className = 'step-counter';
+  sc.textContent = `step_${String(history.length + 1).padStart(2, '0')}`;
+  panel.appendChild(sc);
+
+  if (step.question !== undefined) {
+    const q = document.createElement('div');
+    q.className = 'q-text';
+    q.textContent = step.question;
+    panel.appendChild(q);
+
+    const mainA = Object.entries(step.answers || {}).filter(([k]) => !NAV_KEYS.includes(k));
+    const navA  = Object.entries(step.answers || {}).filter(([k]) => NAV_KEYS.includes(k));
+
+    mainA.forEach(([ans, nid]) => {
+      const btn = document.createElement('button');
+      btn.className = 'ans-btn';
+      btn.textContent = ans;
+      btn.onclick = () => {
+        history.push({ stepId: current, answer: ans, nextId: nid });
+        current = nid;
+        render();
+      };
+      panel.appendChild(btn);
+    });
+
+    if (navA.length) {
+      const div = document.createElement('div');
+      div.className = 'divider';
+      panel.appendChild(div);
+      const row = document.createElement('div');
+      row.className = 'nav-row';
+      navA.forEach(([ans, nid]) => {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        btn.textContent = ans === 'back' ? '← back' : '↺ restart';
+        btn.onclick = () => {
+          if (ans === 'back') history.pop(); else history = [];
+          current = nid;
+          render();
+        };
+        row.appendChild(btn);
+      });
+      panel.appendChild(row);
+    }
+  } else {
+    // Result
+    const box = document.createElement('div');
+    box.className = 'result-box';
+
+    const ds = document.createElement('div');
+    ds.className = 'result-section';
+    ds.innerHTML = `<div class="result-label">diagnosis</div><div class="result-diag">${step.diagnosis || '—'}</div>`;
+    box.appendChild(ds);
+
+    if (step.action) {
+      const as = document.createElement('div');
+      as.className = 'result-section';
+      as.innerHTML = `<div class="result-label">action</div><div class="result-action">${step.action}</div>`;
+      box.appendChild(as);
+    }
+
+    panel.appendChild(box);
+
+    const rb = document.createElement('button');
+    rb.className = 'restart-btn';
+    rb.textContent = '↺ start over';
+    rb.onclick = () => { history = []; current = tree.start; render(); };
+    panel.appendChild(rb);
+  }
+}
+
+// ─── Scroll active node into view ─────────────────────────────────────────────
+function scrollToNode() {
+  const { layout } = buildLayout();
+  const pos = layout[current];
+  if (!pos) return;
+  const container = document.querySelector('.flow-panel');
+  const targetX = pos.x - container.clientWidth / 2 + NODE_W / 2;
+  const targetY = pos.y - container.clientHeight / 2 + NODE_H / 2;
+  container.scrollTo({ left: Math.max(0, targetX), top: Math.max(0, targetY), behavior: 'smooth' });
+}
+
+// ─── Jump to a prior node ──────────────────────────────────────────────────────
+function jumpTo(id) {
+  const idx = history.findIndex(h => h.stepId === id);
+  if (idx !== -1) history = history.slice(0, idx);
+  current = id;
+  render();
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function truncate(str, max) {
+  if (!str) return '';
+  return str.length > max ? str.slice(0, max - 1) + '…' : str;
+}
+
+function render() {
+  renderFlow();
+  renderQuestion();
+  scrollToNode();
+}
+</script>
 </body>
 </html>
