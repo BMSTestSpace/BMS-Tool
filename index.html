@@ -1,125 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>HVAC Troubleshooter</title>
+<meta charset="UTF-8">
+<title>Decision Tree Tool</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+.container {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  height: 100vh;
+}
 
-    body {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1f2933, #111827);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #f9fafb;
-      padding: 20px;
-    }
+#diagram {
+  overflow: auto;
+  border-right: 1px solid #ccc;
+}
 
-    .container {
-      width: 100%;
-      max-width: 520px;
-      background: #ffffff;
-      color: #111827;
-      border-radius: 14px;
-      padding: 30px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-    }
+#panel {
+  padding: 20px;
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+button {
+  display: block;
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+}
 
-    h2 {
-      margin-bottom: 16px;
-    }
+.node {
+  cursor: pointer;
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .btn-restart {
-      background-color: #3b82f6;
-      color: white;
-    }
-  </style>
+</style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>BMS Troubleshooter</h1>
-    <div id="app"></div>
+
+<div class="container">
+  <div id="diagram">
+    <svg id="svg" width="2000" height="2000"></svg>
   </div>
+  <div id="panel">
+    <h2 id="question"></h2>
+    <div id="answers"></div>
+    <div id="result"></div>
+  </div>
+</div>
 
-  <script>
-    let tree;
-    let currentStep;
+<script>
 
-    fetch("https://raw.githubusercontent.com/2abdshjb2u3obe/BMS-Tool/main/output.json")
-      .then(response => response.json())
-      .then(data => {
-        tree = data;
-        currentStep = tree.start;
-        showStep();
-      })
-      .catch(err => {
-        document.getElementById("app").innerText = "Failed to load data.";
-        console.error(err);
-      });
+// ===== YOUR JSON DATA =====
+const data = {
+  start: "q1",
+  steps: /* PASTE YOUR JSON "steps" OBJECT HERE */ 
+};
+Object.assign(data.steps, 
+{
+  // 👉 PASTE everything inside "steps": { ... } HERE
+});
 
-    function showStep() {
-      const step = tree.steps[currentStep];
-      const app = document.getElementById("app");
-      app.innerHTML = "";
+// ===== STATE =====
+let current = data.start;
+let history = [current];
 
-      if (step.question) {
-        const question = document.createElement("h2");
-        question.innerText = step.question;
-        app.appendChild(question);
+// ===== RENDER QUESTION PANEL =====
+function renderPanel() {
+  const node = data.steps[current];
+  const q = document.getElementById("question");
+  const answersDiv = document.getElementById("answers");
+  const resultDiv = document.getElementById("result");
 
-        for (let answer in step.answers) {
-          const btn = document.createElement("button");
-          btn.innerText = answer;
-          btn.onclick = () => {
-            currentStep = step.answers[answer];
-            showStep();
-          };
-          app.appendChild(btn);
+  answersDiv.innerHTML = "";
+  resultDiv.innerHTML = "";
+
+  if (node.question) {
+    q.textContent = node.question;
+
+    Object.entries(node.answers || {}).forEach(([text, next]) => {
+      const btn = document.createElement("button");
+      btn.textContent = text;
+
+      btn.onclick = () => {
+        current = next;
+
+        const index = history.indexOf(current);
+        if (index !== -1) {
+          history = history.slice(0, index + 1);
+        } else {
+          history.push(current);
         }
+
+        renderPanel();
+        drawDiagram();
+      };
+
+      answersDiv.appendChild(btn);
+    });
+
+  } else {
+    q.textContent = "Result";
+
+    resultDiv.innerHTML = `
+      <p><b>Diagnosis:</b> ${node.diagnosis || ""}</p>
+      <p><b>Action:</b> ${node.action || ""}</p>
+    `;
+  }
+}
+
+// ===== DRAW FLOW DIAGRAM =====
+function drawDiagram() {
+  const svg = document.getElementById("svg");
+  svg.innerHTML = "";
+
+  const nodes = Object.keys(data.steps);
+  const positions = {};
+
+  let x = 100, y = 50;
+
+  nodes.forEach((id, i) => {
+    positions[id] = { x: x + (i % 5) * 250, y: y + Math.floor(i / 5) * 120 };
+  });
+
+  // draw lines
+  Object.entries(data.steps).forEach(([id, node]) => {
+    if (!node.answers) return;
+
+    Object.values(node.answers).forEach(target => {
+      if (!positions[target]) return;
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+
+      line.setAttribute("x1", positions[id].x);
+      line.setAttribute("y1", positions[id].y);
+
+      line.setAttribute("x2", positions[target].x);
+      line.setAttribute("y2", positions[target].y);
+
+      // path coloring
+      if (history.includes(id) && history.includes(target)) {
+        line.setAttribute("stroke", "green");
       } else {
-        const result = document.createElement("h2");
-        result.innerText = "Diagnosis: " + step.diagnosis;
-
-        const action = document.createElement("p");
-        action.innerText = "Action: " + step.action;
-
-        const restartBtn = document.createElement("button");
-        restartBtn.className = "btn-restart";
-        restartBtn.innerText = "Restart";
-        restartBtn.onclick = () => {
-          currentStep = tree.start;
-          showStep();
-        };
-
-        app.appendChild(result);
-        app.appendChild(action);
-        app.appendChild(restartBtn);
+        line.setAttribute("stroke", "#ccc");
       }
+
+      svg.appendChild(line);
+    });
+  });
+
+  // draw nodes
+  Object.entries(data.steps).forEach(([id, node]) => {
+    const { x, y } = positions[id];
+
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", 25);
+    circle.classList.add("node");
+
+    if (id === current) {
+      circle.setAttribute("fill", "blue");
+    } else if (history.includes(id)) {
+      circle.setAttribute("fill", "green");
+    } else {
+      circle.setAttribute("fill", "#ccc");
     }
-  </script>
+
+    circle.onclick = () => {
+      if (history.includes(id)) {
+        current = id;
+        history = history.slice(0, history.indexOf(id) + 1);
+        renderPanel();
+        drawDiagram();
+      }
+    };
+
+    svg.appendChild(circle);
+
+    // text label
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", x);
+    text.setAttribute("y", y + 5);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-size", "10");
+    text.setAttribute("fill", "black");
+
+    text.textContent = id;
+    svg.appendChild(text);
+  });
+}
+
+// ===== INIT =====
+renderPanel();
+drawDiagram();
+
+</script>
+
 </body>
 </html>
