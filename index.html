@@ -438,6 +438,101 @@
     .flow-node { cursor: pointer; }
     .flow-node rect { transition: filter 0.15s; }
     .flow-node:hover rect { filter: brightness(1.15); }
+
+    /* ── Gemini chat bubble ── */
+    #gemini-fab {
+      position: fixed;
+      bottom: 24px; left: 24px;
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4285f4, #34a853);
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(66,133,244,0.35);
+      z-index: 200;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    #gemini-fab:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(66,133,244,0.45); }
+
+    #gemini-drawer {
+      position: fixed;
+      bottom: 86px; left: 24px;
+      width: 340px; max-height: 520px;
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      display: flex; flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      z-index: 199; overflow: hidden;
+      transform: scale(0.92) translateY(12px);
+      transform-origin: bottom left;
+      opacity: 0; pointer-events: none;
+      transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), opacity 0.18s;
+    }
+    #gemini-drawer.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+
+    .gem-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2); flex-shrink: 0;
+    }
+    .gem-dot { width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg,#4285f4,#34a853); flex-shrink:0; }
+    .gem-title { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text); flex: 1; }
+    .gem-sub { font-family: var(--mono); font-size: 9px; color: var(--text-dim); }
+    .gem-close { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 18px; line-height:1; padding: 0 2px; }
+    .gem-close:hover { color: var(--text); }
+
+    .gem-messages {
+      flex: 1; overflow-y: auto;
+      padding: 12px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .gem-msg {
+      max-width: 90%; font-size: 12.5px; line-height: 1.55;
+      padding: 8px 11px; border-radius: 10px; font-family: var(--sans);
+    }
+    .gem-msg.user {
+      align-self: flex-end;
+      background: var(--accent-dim); color: var(--accent);
+      border: 1px solid var(--accent); border-bottom-right-radius: 3px;
+    }
+    .gem-msg.ai {
+      align-self: flex-start;
+      background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border); border-bottom-left-radius: 3px;
+    }
+    .gem-msg.typing { color: var(--text-dim); font-style: italic; }
+
+    .gem-quick-btns { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 8px; }
+    .gem-quick-btn {
+      font-family: var(--mono); font-size: 10px;
+      padding: 4px 9px; border: 1px solid var(--border); border-radius: 20px;
+      background: var(--surface2); color: var(--text-muted); cursor: pointer;
+      transition: border-color 0.15s, color 0.15s; white-space: nowrap;
+    }
+    .gem-quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .gem-input-row {
+      display: flex; gap: 6px; padding: 10px 12px;
+      border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    .gem-input {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 10px;
+      font-family: var(--sans); font-size: 12px; color: var(--text);
+      outline: none; transition: border-color 0.15s;
+    }
+    .gem-input:focus { border-color: var(--accent); }
+    .gem-input::placeholder { color: var(--text-dim); }
+    .gem-send {
+      background: var(--accent); border: none; border-radius: 6px;
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; transition: opacity 0.15s;
+    }
+    .gem-send:hover { opacity: 0.85; }
+    .gem-send:disabled { opacity: 0.4; cursor: default; }
+
   </style>
 </head>
 <body>
@@ -879,5 +974,32 @@ function render() {
   scrollToNode();
 }
 </script>
+
+<!-- Gemini floating chat -->
+<button id="gemini-fab" onclick="toggleGemini()" title="Ask Gemini AI">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="white" opacity="0"/>
+    <path d="M12 3 C12 3, 15 8, 19 12 C15 16, 12 21, 12 21 C12 21, 9 16, 5 12 C9 8, 12 3, 12 3Z" fill="white" opacity="0.9"/>
+    <circle cx="12" cy="12" r="3" fill="white" opacity="0.6"/>
+  </svg>
+</button>
+
+<div id="gemini-drawer">
+  <div class="gem-header">
+    <div class="gem-dot"></div>
+    <span class="gem-title">Gemini AI Assistant</span>
+    <span class="gem-sub">BMS Expert</span>
+    <button class="gem-close" onclick="toggleGemini()">×</button>
+  </div>
+  <div class="gem-messages" id="gem-messages"></div>
+  <div class="gem-quick-btns" id="gem-quick-btns"></div>
+  <div class="gem-input-row">
+    <input class="gem-input" id="gem-input" placeholder="Ask anything about this issue…" />
+    <button class="gem-send" id="gem-send" onclick="geminiSend()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
