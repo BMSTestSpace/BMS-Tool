@@ -972,7 +972,136 @@ function render() {
   renderFlow();
   renderQuestion();
   scrollToNode();
+  if (typeof geminiOpen !== 'undefined' && geminiOpen && geminiReady) renderQuickBtns();
 }
+// ─── Gemini AI ────────────────────────────────────────────────────────────────
+const GEMINI_KEY = "AIzaSyCDXGDAWsnc5Y-snJYgePrt9p7y74vE5vs";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+let geminiOpen = false;
+let geminiMessages = [];
+let geminiReady = false;
+
+function toggleGemini() {
+  geminiOpen = !geminiOpen;
+  document.getElementById('gemini-drawer').classList.toggle('open', geminiOpen);
+  if (geminiOpen && !geminiReady) {
+    geminiReady = true;
+    geminiWelcome();
+  }
+  if (geminiOpen) setTimeout(() => document.getElementById('gem-input').focus(), 200);
+}
+
+function geminiWelcome() {
+  const step = tree ? tree.steps[current] : null;
+  const ctx = step?.question || step?.diagnosis || 'starting troubleshoot';
+  geminiAddMsg('ai', `Hi${currentUser ? ' ' + currentUser.name.split(' ')[0] : ''}! I'm your BMS AI assistant. You're currently at: "${ctx}". Ask me anything or use the quick buttons below.`);
+  renderQuickBtns();
+}
+
+function renderQuickBtns() {
+  const el = document.getElementById('gem-quick-btns');
+  if (!el) return;
+  el.innerHTML = '';
+  const step = tree ? tree.steps[current] : null;
+  const btns = [
+    { label: '💡 Suggest next step', prompt: 'Based on my troubleshooting path so far, what should I check next and why?' },
+    { label: '📋 Summarize session', prompt: 'Summarize my troubleshooting session so far and what the findings indicate.' },
+    { label: '❓ Explain this step', prompt: 'Explain why the current step matters in BMS troubleshooting and what I should look for.' },
+    { label: '⚡ Common mistakes', prompt: 'What are the most common mistakes technicians make at this stage of BMS troubleshooting?' },
+  ];
+  btns.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'gem-quick-btn';
+    btn.textContent = b.label;
+    btn.onclick = () => geminiAsk(b.prompt);
+    el.appendChild(btn);
+  });
+}
+
+function geminiContext() {
+  const step = tree ? tree.steps[current] : null;
+  const pathStr = history.map(h => `Q: "${tree.steps[h.stepId]?.question || h.stepId}" → A: "${h.answer}"`).join('\n');
+  const resultInfo = step?.diagnosis ? `\nDiagnosis reached: "${step.diagnosis}"\nRecommended action: "${step.action || 'N/A'}"` : '';
+  return `You are an expert BMS (Building Management System) field technician assistant helping a technician diagnose an issue.
+
+Technician: ${currentUser?.name || 'Unknown'} (${currentUser?.email || 'N/A'})
+Current step question: "${step?.question || step?.diagnosis || current}"
+
+Troubleshooting path taken so far:
+${pathStr || '(just started — no steps taken yet)'}${resultInfo}
+
+Be concise and practical. Plain language. If listing steps, number them. Keep responses under 150 words unless detail is truly needed.`;
+}
+
+async function geminiAsk(userText) {
+  if (!userText.trim()) return;
+  geminiAddMsg('user', userText);
+  document.getElementById('gem-input').value = '';
+  const typingEl = geminiAddMsg('ai', '…thinking…');
+  typingEl.style.color = 'var(--text-dim)';
+  typingEl.style.fontStyle = 'italic';
+  const sendBtn = document.getElementById('gem-send');
+  if (sendBtn) sendBtn.disabled = true;
+
+  console.log('[Gemini] Sending to API:', userText);
+
+  const contents = [];
+  contents.push({ role: 'user', parts: [{ text: geminiContext() }] });
+  contents.push({ role: 'model', parts: [{ text: 'Understood. Ready to assist with BMS troubleshooting.' }] });
+  geminiMessages.slice(0, -1).forEach(m => {
+    contents.push({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.text }] });
+  });
+  contents.push({ role: 'user', parts: [{ text: userText }] });
+
+  try {
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+      })
+    });
+    const data = await res.json();
+    console.log('[Gemini] Response:', data);
+    if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+    typingEl.textContent = reply;
+    typingEl.style.color = '';
+    typingEl.style.fontStyle = '';
+    geminiMessages[geminiMessages.length - 1].text = reply;
+  } catch (e) {
+    console.error('[Gemini] Error:', e);
+    typingEl.textContent = '⚠ Error: ' + e.message;
+    typingEl.style.color = 'var(--red)';
+    typingEl.style.fontStyle = '';
+  }
+  if (sendBtn) sendBtn.disabled = false;
+}
+
+function geminiSend() {
+  const val = document.getElementById('gem-input').value.trim();
+  if (val) geminiAsk(val);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement === document.getElementById('gem-input')) {
+    e.preventDefault();
+    geminiSend();
+  }
+});
+
+function geminiAddMsg(role, text) {
+  const el = document.createElement('div');
+  el.className = `gem-msg ${role}`;
+  el.textContent = text;
+  const container = document.getElementById('gem-messages');
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  geminiMessages.push({ role, text });
+  return el;
+}
+
 </script>
 
 <!-- Gemini floating chat -->
