@@ -381,7 +381,7 @@
 
     .nav-btn:hover { border-color: var(--border-bright); color: var(--text); }
 
-    /* Result */
+    /* Result styling */
     .result-box {
       border: 1px solid #f97316;
       border-radius: 6px;
@@ -625,9 +625,8 @@ let history = [];
 let geminiReady = false;
 let geminiMessages = [];
 
-// This engine waits for the page layout elements to physically exist before setting up
+// Removed restoreUser() from layout cycle so login box ALWAYS pops up fresh
 window.onload = function() {
-  restoreUser();
   fetchTreeData();
 };
 
@@ -641,7 +640,7 @@ function fetchTreeData() {
       checkAppReady();
     })
     .catch(() => {
-      // Fallback network backup if github fails
+      // Fallback fallback if external asset fails to load
       tree = {"start":"q1","steps":{"q1":{"question":"What are you working on?","answers":{"AS":"q2","UI16":"q101","DO8":"q201","AO8":"q301","OTHER":"q401"}},"q2":{"question":"Is the Panel on?","answers":{"yes":"q3","no":"r1","back":"q1","Restart":"q1"}},"q3":{"question":"Is the low voltage on?","answers":{"yes":"q4","no":"r2","back":"q2","Restart":"q1"}},"q4":{"question":"Any breakers tripped?","answers":{"no":"q5","yes":"r3","back":"q3","Restart":"q1"}},"q5":{"question":"Any fuses?","answers":{"no":"q6","yes":"r4","back":"q4","Restart":"q1"}},"q6":{"question":"Is the transformer tripped?","answers":{"no":"q7","yes":"r5","back":"q5","Restart":"q1"}},"q7":{"question":"Status light solid green?","answers":{"yes":"r6","no":"r6","back":"q6","Restart":"q1"}},"r1":{"diagnosis":"No power","action":"Check all breakers"},"r2":{"diagnosis":"Low voltage off","action":"Turn on low voltage breaker"},"r3":{"diagnosis":"Breakers tripped","action":"Confirm why with a multimeter"},"r4":{"diagnosis":"Fuses possibly bad","action":"Test and/or replace fuses"},"r5":{"diagnosis":"Transformer tripped","action":"Confirm VA and reset"},"r6":{"diagnosis":"AS appears normal","action":"Connect to the AS"},"q101":{"question":"Is the UI16 status light solid?","answers":{"yes":"q102","no":"r101","back":"q1","Restart":"q1"}},"q102":{"question":"What kind of point?","answers":{"DI":"q103","AI":"q107","TEMPERATURE":"q113","back":"q101","Restart":"q1"}},"q103":{"question":"Is your DI NO or NC?","answers":{"NO":"q104","NC":"q105","back":"q102","Restart":"q1"}},"q104":{"question":"Jump out DI — UI come in?","answers":{"yes":"q106","no":"r102","back":"q103","Restart":"q1"}},"q105":{"question":"Jump out DI — lose the UI?","answers":{"yes":"q106","no":"r102","back":"q104","Restart":"q1"}},"q106":{"question":"Splice/unsplice wires — see a change?","answers":{"yes":"r104","no":"r105","back":"q105","Restart":"q1"}},"q107":{"question":"What kind of signal?","answers":{"4-20mA":"q108","0/2-10VDC":"q114","back":"q105","Restart":"q1"}},"q108":{"question":"2-wire loop or 3-wire sensor?","answers":{"2 wire":"q109","3-wire":"q110","back":"q105","Restart":"q1"}},"q109":{"question":"Is DC power on?","answers":{"yes":"q110","no":"r106","back":"q1","Restart":"q1"}},"q110":{"question":"Device AC or DC powered?","answers":{"AC":"q111","DC":"q109","back":"q1","Restart":"q1"}},"q111":{"question":"AC power on from breakers/transformer?","answers":{"yes":"q112","no":"r107","back":"q1","Restart":"q1"}},"q112":{"question":"Signal at BMS panel when wire disconnected?","answers":{"yes":"r102","no":"r103","back":"q1","Restart":"q1"}},"q113":{"question":"What are we reading?","answers":{"32degF":"r108","slightly inaccurate":"r109","extremely high":"r110","back":"q1","Restart":"q1"}},"q114":{"question":"0/2-10VDC — coming soon","answers":{"back":"q107","Restart":"q1"}},"r101":{"diagnosis":"Check S-cable / module connections","action":"Inspect connections between modules"},"r102":{"diagnosis":"Confirm input is created","action":"Try simulating on a different UI input"},"r103":{"diagnosis":"Check field device","action":"If device can signal, tone out the wires"},"r104":{"diagnosis":"Issue with field device","action":"Confirm power, terminations, etc."},"r105":{"diagnosis":"Wrong device or wrong wires","action":"Tone out wires for the device you are working on"},"r106":{"diagnosis":"DC power off","action":"Turn on DC power, check breakers/fuses"},"r107":{"diagnosis":"AC power off","action":"Test with multimeter, restore power before continuing"},"r108":{"diagnosis":"Point not reading","action":"Confirm device is on correct UI and terminated in field"},"r109":{"diagnosis":"Slight inaccuracy","action":"Continuity test wires for shorts"},"r110":{"diagnosis":"Short on wire — false high reading","action":"Find short, test at panel and device"},"q201":{"question":"DO8 — coming soon","answers":{"back":"q1","Restart":"q1"}},"q301":{"question":"AO8 — coming soon","answers":{"back":"q1","Restart":"q1"}},"q401":{"question":"Other — coming soon","answers":{"back":"q1","Restart":"q1"}}}};
       current = tree.start;
       render();
@@ -665,18 +664,6 @@ function submitLogin() {
 
   sessionStorage.setItem('bms_user', JSON.stringify(currentUser));
   checkAppReady();
-}
-
-function restoreUser() {
-  const saved = sessionStorage.getItem('bms_user');
-  if (saved) {
-    try {
-      currentUser = JSON.parse(saved);
-      sessionStart = new Date().toISOString();
-      document.getElementById('login-overlay').classList.add('hidden');
-      document.getElementById('user-chip').textContent = currentUser.name;
-    } catch(_) {}
-  }
 }
 
 // ─── Coordination gate ────────────────────────────────────────────────────────
@@ -911,6 +898,7 @@ function renderQuestion() {
   sc.textContent = `step_${String(history.length + 1).padStart(2, '0')}`;
   panel.appendChild(sc);
 
+  // Check if it's a question step
   if (step.question !== undefined) {
     const q = document.createElement('div');
     q.className = 'q-text';
@@ -956,6 +944,37 @@ function renderQuestion() {
       });
       panel.appendChild(row);
     }
+  } 
+  // Else if it's a resolution/diagnosis step, trigger Supabase save
+  else if (step.diagnosis !== undefined) {
+    const box = document.createElement('div');
+    box.className = 'result-box';
+
+    const s1 = document.createElement('div');
+    s1.className = 'result-section';
+    s1.innerHTML = `<div class="result-label">DIAGNOSIS</div><div class="result-diag">${step.diagnosis}</div>`;
+    box.appendChild(s1);
+
+    if (step.action) {
+      const s2 = document.createElement('div');
+      s2.className = 'result-section';
+      s2.innerHTML = `<div class="result-label">RECOMMENDED ACTION</div><div class="result-action">${step.action}</div>`;
+      box.appendChild(s2);
+    }
+    panel.appendChild(box);
+
+    const rBtn = document.createElement('button');
+    rBtn.className = 'restart-btn';
+    rBtn.textContent = '↺ START NEW SESSION';
+    rBtn.onclick = () => {
+      history = [];
+      current = tree.start;
+      render();
+    };
+    panel.appendChild(rBtn);
+
+    // Call Supabase insertion automatically upon reaching conclusion node
+    saveSession(step);
   }
 }
 
@@ -963,7 +982,7 @@ function renderQuestion() {
 function geminiWelcome() {
   const container = document.getElementById('gem-messages');
   if(!container) return;
-  container.innerHTML = `<div class="gem-msg ai">Hello ${currentUser.name || 'there'}. I am your BMS Copilot. How can I assist you with your troubleshooting session today?</div>`;
+  container.innerHTML = `<div class="gem-msg ai">Hello ${currentUser ? currentUser.name : 'there'}. I am your BMS Copilot. How can I assist you with your troubleshooting session today?</div>`;
 }
 
 function geminiSend() {
@@ -976,7 +995,6 @@ function geminiSend() {
   input.value = '';
   container.scrollTop = container.scrollHeight;
   
-  // Simulate assistant response placeholder
   setTimeout(() => {
     container.innerHTML += `<div class="gem-msg ai">Processing query regarding current step... (Connect your AI endpoint to implement full automated responses)</div>`;
     container.scrollTop = container.scrollHeight;
