@@ -210,7 +210,7 @@
 
     .main {
       display: grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: 1fr 340px;
       flex: 1;
       overflow: hidden;
       height: calc(100vh - 49px);
@@ -248,8 +248,8 @@
       overflow: visible;
     }
 
-    /* Question panel */
-    .q-panel {
+    /* Right column panel setup */
+    .right-panel {
       display: flex;
       flex-direction: column;
       background: var(--surface);
@@ -264,12 +264,41 @@
       padding: 8px 16px;
       border-bottom: 1px solid var(--border);
       text-transform: uppercase;
+      background: var(--surface);
     }
 
+    .history-trail {
+      padding: 4px 16px;
+      border-bottom: 1px solid var(--border);
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .crumb {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .crumb-sep {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .crumb.active { color: var(--accent); }
+
+    /* Top interactive question half */
     .q-content {
       flex: 1;
       overflow-y: auto;
-      padding: 20px 16px;
+      padding: 16px;
     }
 
     .step-counter {
@@ -277,15 +306,15 @@
       font-size: 10px;
       color: var(--text-dim);
       letter-spacing: 0.08em;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .q-text {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--text);
-      line-height: 1.5;
-      margin-bottom: 18px;
+      line-height: 1.4;
+      margin-bottom: 14px;
     }
 
     .ans-btn {
@@ -293,7 +322,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 12px;
+      padding: 9px 12px;
       margin-bottom: 6px;
       border: 1px solid var(--border);
       border-radius: 5px;
@@ -355,12 +384,12 @@
       border: 1px solid #f97316;
       border-radius: 6px;
       overflow: hidden;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       background: #fff7ed;
     }
 
     .result-section {
-      padding: 12px 14px;
+      padding: 10px 12px;
     }
 
     .result-section + .result-section {
@@ -373,7 +402,7 @@
       letter-spacing: 0.1em;
       color: var(--text-dim);
       text-transform: uppercase;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
 
     .result-diag {
@@ -385,7 +414,7 @@
     .result-action {
       font-size: 13px;
       color: #7c3510;
-      line-height: 1.5;
+      line-height: 1.4;
     }
 
     .restart-btn {
@@ -407,119 +436,73 @@
       color: var(--text);
     }
 
-    /* History breadcrumb */
-    .history-trail {
-      padding: 0 16px 0;
-      border-bottom: 1px solid var(--border);
-      min-height: 32px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-wrap: wrap;
-      overflow: hidden;
-    }
-
-    .crumb {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text-dim);
-      white-space: nowrap;
-    }
-
-    .crumb-sep {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text-dim);
-    }
-
-    .crumb.active { color: var(--accent); }
-
     /* SVG node styles */
     .flow-node { cursor: pointer; }
     .flow-node rect { transition: filter 0.15s; }
     .flow-node:hover rect { filter: brightness(1.15); }
 
-    /* ── Gemini chat bubble ── */
-    #gemini-fab {
-      position: fixed;
-      bottom: 24px; left: 24px;
-      width: 50px; height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #4285f4, #34a853);
-      border: none;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 16px rgba(66,133,244,0.35);
-      z-index: 200;
-      transition: transform 0.2s, box-shadow 0.2s;
+    /* ── Integrated Gemini Box (Bottom-Right Panel) ── */
+    .gem-panel-divider {
+      height: 1px;
+      background: var(--border-bright);
     }
-    #gemini-fab:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(66,133,244,0.45); }
 
-    #gemini-drawer {
-      position: fixed;
-      bottom: 86px; left: 24px;
-      width: 340px; max-height: 520px;
-      background: var(--surface);
-      border: 1px solid var(--border-bright);
-      border-radius: 12px;
-      display: flex; flex-direction: column;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
-      z-index: 199; overflow: hidden;
-      transform: scale(0.92) translateY(12px);
-      transform-origin: bottom left;
-      opacity: 0; pointer-events: none;
-      transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), opacity 0.18s;
+    .gemini-integrated-box {
+      height: 380px;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface2);
     }
-    #gemini-drawer.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
 
     .gem-header {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
       border-bottom: 1px solid var(--border);
-      background: var(--surface2); flex-shrink: 0;
+      background: var(--surface);
+      flex-shrink: 0;
     }
-    .gem-dot { width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg,#4285f4,#34a853); flex-shrink:0; }
+    .gem-dot { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg,#4285f4,#34a853); flex-shrink:0; }
     .gem-title { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text); flex: 1; }
     .gem-sub { font-family: var(--mono); font-size: 9px; color: var(--text-dim); }
-    .gem-close { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 18px; line-height:1; padding: 0 2px; }
-    .gem-close:hover { color: var(--text); }
 
     .gem-messages {
       flex: 1; overflow-y: auto;
-      padding: 12px; display: flex; flex-direction: column; gap: 10px;
+      padding: 12px; display: flex; flex-direction: column; gap: 8px;
     }
     .gem-msg {
-      max-width: 90%; font-size: 12.5px; line-height: 1.55;
-      padding: 8px 11px; border-radius: 10px; font-family: var(--sans);
+      max-width: 90%; font-size: 12px; line-height: 1.5;
+      padding: 8px 11px; border-radius: 8px; font-family: var(--sans);
     }
     .gem-msg.user {
       align-self: flex-end;
       background: var(--accent-dim); color: var(--accent);
-      border: 1px solid var(--accent); border-bottom-right-radius: 3px;
+      border: 1px solid var(--accent); border-bottom-right-radius: 2px;
     }
     .gem-msg.ai {
       align-self: flex-start;
-      background: var(--surface2); color: var(--text);
-      border: 1px solid var(--border); border-bottom-left-radius: 3px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-bottom-left-radius: 2px;
     }
-    .gem-msg.typing { color: var(--text-dim); font-style: italic; }
 
-    .gem-quick-btns { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 8px; }
+    .gem-quick-btns { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 12px 6px; overflow-x: auto; }
     .gem-quick-btn {
-      font-family: var(--mono); font-size: 10px;
-      padding: 4px 9px; border: 1px solid var(--border); border-radius: 20px;
-      background: var(--surface2); color: var(--text-muted); cursor: pointer;
+      font-family: var(--mono); font-size: 9px;
+      padding: 3px 8px; border: 1px solid var(--border); border-radius: 12px;
+      background: var(--surface); color: var(--text-muted); cursor: pointer;
       transition: border-color 0.15s, color 0.15s; white-space: nowrap;
     }
     .gem-quick-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     .gem-input-row {
-      display: flex; gap: 6px; padding: 10px 12px;
+      display: flex; gap: 6px; padding: 8px 12px 12px;
+      background: var(--surface);
       border-top: 1px solid var(--border); flex-shrink: 0;
     }
     .gem-input {
       flex: 1; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 6px; padding: 7px 10px;
+      border-radius: 6px; padding: 6px 10px;
       font-family: var(--sans); font-size: 12px; color: var(--text);
       outline: none; transition: border-color 0.15s;
     }
@@ -527,7 +510,7 @@
     .gem-input::placeholder { color: var(--text-dim); }
     .gem-send {
       background: var(--accent); border: none; border-radius: 6px;
-      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
       cursor: pointer; flex-shrink: 0; transition: opacity 0.15s;
     }
     .gem-send:hover { opacity: 0.85; }
@@ -574,35 +557,31 @@
     </div>
   </div>
 
-  <div class="q-panel">
+  <div class="right-panel">
     <div class="q-panel-label">current step</div>
     <div class="history-trail" id="history-trail"></div>
+    
     <div class="q-content" id="q-content"></div>
-  </div>
-</div>
 
-<button id="gemini-fab" onclick="toggleGemini()">
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-  </svg>
-</button>
+    <div class="gem-panel-divider"></div>
 
-<div id="gemini-drawer">
-  <div class="gem-header">
-    <div class="gem-dot"></div>
-    <div class="gem-title">BMS Copilot <span class="gem-sub">Gemini 2.5</span></div>
-    <button class="gem-close" onclick="toggleGemini()">×</button>
-  </div>
-  <div class="gem-messages" id="gem-messages"></div>
-  <div class="gem-quick-btns" id="gem-quick-btns"></div>
-  <div class="gem-input-row">
-    <input type="text" id="gem-input" class="gem-input" placeholder="Ask about this step..." />
-    <button id="gem-send" class="gem-send" onclick="geminiSend()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="22" y1="2" x2="11" y2="13"></line>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-      </svg>
-    </button>
+    <div class="gemini-integrated-box">
+      <div class="gem-header">
+        <div class="gem-dot"></div>
+        <div class="gem-title">BMS Copilot <span class="gem-sub">Gemini 2.5</span></div>
+      </div>
+      <div class="gem-messages" id="gem-messages"></div>
+      <div class="gem-quick-btns" id="gem-quick-btns"></div>
+      <div class="gem-input-row">
+        <input type="text" id="gem-input" class="gem-input" placeholder="Ask about this step..." />
+        <button id="gem-send" class="gem-send" onclick="geminiSend()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -630,522 +609,4 @@ async function sbInsert(row) {
   return res.json();
 }
 
-// ─── User identity ────────────────────────────────────────────────────────────
-let currentUser = null;   // { name, email }
-let sessionStart = null;
-
-function submitLogin() {
-  const name  = document.getElementById('login-name').value.trim();
-  const email = document.getElementById('login-email').value.trim();
-  const err   = document.getElementById('login-error');
-
-  if (!name) { err.textContent = 'name is required'; return; }
-  if (!email || !email.includes('@')) { err.textContent = 'valid email is required'; return; }
-
-  currentUser  = { name, email };
-  sessionStart = new Date().toISOString();
-  document.getElementById('login-overlay').classList.add('hidden');
-  document.getElementById('user-chip').textContent = name;
-
-  sessionStorage.setItem('bms_user', JSON.stringify(currentUser));
-}
-
-(function restoreUser() {
-  const saved = sessionStorage.getItem('bms_user');
-  if (saved) {
-    try {
-      currentUser = JSON.parse(saved);
-      sessionStart = new Date().toISOString();
-      document.getElementById('login-overlay').classList.add('hidden');
-      document.getElementById('user-chip').textContent = currentUser.name;
-    } catch(_) {}
-  }
-})();
-
-// ─── Toast helper ─────────────────────────────────────────────────────────────
-let toastTimer;
-function showToast(msg, type = '') {
-  const t = document.getElementById('save-toast');
-  t.textContent = msg;
-  t.className = 'show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = ''; }, 3200);
-}
-
-// ─── Save session to Supabase ─────────────────────────────────────────────────
-async function saveSession(resultStep) {
-  if (!currentUser) return;
-  const deviceAnswer = history[0]?.answer || null;
-  try {
-    await sbInsert({
-      user_name:    currentUser.name,
-      user_email:   currentUser.email,
-      device_type:  deviceAnswer,
-      diagnosis:    resultStep.diagnosis || null,
-      action:       resultStep.action    || null,
-      result_id:    current,
-      path:         history,
-      step_count:   history.length,
-      completed_at: new Date().toISOString()
-    });
-    showToast('✓ session saved', 'ok');
-  } catch (e) {
-    console.error('Supabase save failed:', e);
-    showToast('⚠ save failed — check console', 'err');
-  }
-}
-
-// ─── Load data ────────────────────────────────────────────────────────────────
-const DATA_URL = "https://raw.githubusercontent.com/2abdshjb2u3obe/BMS-Tool/main/output.json";
-
-let tree = null;
-let current = null;
-let history = [];
-const NAV_KEYS = ['back', 'Restart'];
-
-fetch(DATA_URL)
-  .then(r => r.json())
-  .then(data => {
-    tree = data;
-    current = tree.start;
-    render();
-  })
-  .catch(() => {
-    tree = {"start":"q1","steps":{"q1":{"question":"What are you working on?","answers":{"AS":"q2","UI16":"q101","DO8":"q201","AO8":"q301","OTHER":"q401"}},"q2":{"question":"Is the Panel on?","answers":{"yes":"q3","no":"r1","back":"q1","Restart":"q1"}},"q3":{"question":"Is the low voltage on?","answers":{"yes":"q4","no":"r2","back":"q2","Restart":"q1"}},"q4":{"question":"Any breakers tripped?","answers":{"no":"q5","yes":"r3","back":"q3","Restart":"q1"}},"q5":{"question":"Any fuses?","answers":{"no":"q6","yes":"r4","back":"q4","Restart":"q1"}},"q6":{"question":"Is the transformer tripped?","answers":{"no":"q7","yes":"r5","back":"q5","Restart":"q1"}},"q7":{"question":"Status light solid green?","answers":{"yes":"r6","no":"r6","back":"q6","Restart":"q1"}},"r1":{"diagnosis":"No power","action":"Check all breakers"},"r2":{"diagnosis":"Low voltage off","action":"Turn on low voltage breaker"},"r3":{"diagnosis":"Breakers tripped","action":"Confirm why with a multimeter"},"r4":{"diagnosis":"Fuses possibly bad","action":"Test and/or replace fuses"},"r5":{"diagnosis":"Transformer tripped","action":"Confirm VA and reset"},"r6":{"diagnosis":"AS appears normal","action":"Connect to the AS"},"q101":{"question":"Is the UI16 status light solid?","answers":{"yes":"q102","no":"r101","back":"q1","Restart":"q1"}},"q102":{"question":"What kind of point?","answers":{"DI":"q103","AI":"q107","TEMPERATURE":"q113","back":"q101","Restart":"q1"}},"q103":{"question":"Is your DI NO or NC?","answers":{"NO":"q104","NC":"q105","back":"q102","Restart":"q1"}},"q104":{"question":"Jump out DI — UI come in?","answers":{"yes":"q106","no":"r102","back":"q103","Restart":"q1"}},"q105":{"question":"Jump out DI — lose the UI?","answers":{"yes":"q106","no":"r102","back":"q104","Restart":"q1"}},"q106":{"question":"Splice/unsplice wires — see a change?","answers":{"yes":"r104","no":"r105","back":"q105","Restart":"q1"}},"q107":{"question":"What kind of signal?","answers":{"4-20mA":"q108","0/2-10VDC":"q114","back":"q105","Restart":"q1"}},"q108":{"question":"2-wire loop or 3-wire sensor?","answers":{"2 wire":"q109","3-wire":"q110","back":"q105","Restart":"q1"}},"q109":{"question":"Is DC power on?","answers":{"yes":"q110","no":"r106","back":"q1","Restart":"q1"}},"q110":{"question":"Device AC or DC powered?","answers":{"AC":"q111","DC":"q109","back":"q1","Restart":"q1"}},"q111":{"question":"AC power on from breakers/transformer?","answers":{"yes":"q112","no":"r107","back":"q1","Restart":"q1"}},"q112":{"question":"Signal at BMS panel when wire disconnected?","answers":{"yes":"r102","no":"r103","back":"q1","Restart":"q1"}},"q113":{"question":"What are we reading?","answers":{"32degF":"r108","slightly inaccurate":"r109","extremely high":"r110","back":"q1","Restart":"q1"}},"q114":{"question":"0/2-10VDC — coming soon","answers":{"back":"q107","Restart":"q1"}},"r101":{"diagnosis":"Check S-cable / module connections","action":"Inspect connections between modules"},"r102":{"diagnosis":"Confirm input is created","action":"Try simulating on a different UI input"},"r103":{"diagnosis":"Check field device","action":"If device can signal, tone out the wires"},"r104":{"diagnosis":"Issue with field device","action":"Confirm power, terminations, etc."},"r105":{"diagnosis":"Wrong device or wrong wires","action":"Tone out wires for the device you are working on"},"r106":{"diagnosis":"DC power off","action":"Turn on DC power, check breakers/fuses"},"r107":{"diagnosis":"AC power off","action":"Test with multimeter, restore power before continuing"},"r108":{"diagnosis":"Point not reading","action":"Confirm device is on correct UI and terminated in field"},"r109":{"diagnosis":"Slight inaccuracy","action":"Continuity test wires for shorts"},"r110":{"diagnosis":"Short on wire — false high reading","action":"Find short, test at panel and device"},"q201":{"question":"DO8 — coming soon","answers":{"back":"q1","Restart":"q1"}},"q301":{"question":"AO8 — coming soon","answers":{"back":"q1","Restart":"q1"}},"q401":{"question":"Other — coming soon","answers":{"back":"q1","Restart":"q1"}}}};
-    current = tree.start;
-    render();
-  });
-
-// ─── Layout engine ────────────────────────────────────────────────────────────
-const NODE_W = 124, NODE_H = 36, GAP_X = 44, GAP_Y = 24;
-
-function buildLayout() {
-  const cols = {}, rows = {}, visited = new Set();
-  const edges = [];
-
-  function bfs() {
-    const queue = [{ id: tree.start, col: 0, row: 0 }];
-    const placed = {};
-    const colCounters = {};
-
-    while (queue.length) {
-      const { id, col, row } = queue.shift();
-      if (visited.has(id)) continue;
-      visited.add(id);
-
-      if (!(col in colCounters)) colCounters[col] = row;
-      const r = Math.max(colCounters[col], row);
-      colCounters[col] = r + 1;
-
-      cols[id] = col;
-      rows[id] = r;
-      placed[id] = true;
-
-      const s = tree.steps[id];
-      if (!s) continue;
-      const nexts = Object.entries(s.answers || {}).filter(([k]) => !NAV_KEYS.includes(k));
-      const offset = -(nexts.length - 1) / 2;
-      nexts.forEach(([label, nid], i) => {
-        if (nid && tree.steps[nid]) {
-          edges.push({ from: id, to: nid, label: nexts.length > 1 ? label : '' });
-          if (!visited.has(nid)) {
-            queue.push({ id: nid, col: col + Math.round(offset + i), row: r + 1 });
-          }
-        }
-      });
-    }
-  }
-
-  bfs();
-
-  const allCols = Object.values(cols);
-  const allRows = Object.values(rows);
-  const minCol = Math.min(...allCols);
-  const maxCol = Math.max(...allCols);
-  const maxRow = Math.max(...allRows);
-
-  const layout = {};
-  Object.keys(cols).forEach(id => {
-    const c = cols[id] - minCol;
-    const r = rows[id];
-    layout[id] = {
-      x: c * (NODE_W + GAP_X) + 16,
-      y: r * (NODE_H + GAP_Y) + 16,
-      w: NODE_W,
-      h: NODE_H
-    };
-  });
-
-  const totalW = (maxCol - minCol + 1) * (NODE_W + GAP_X) + 32;
-  const totalH = (maxRow + 1) * (NODE_H + GAP_Y) + 32;
-  return { layout, edges, totalW, totalH };
-}
-
-function truncate(str, len) {
-  if (!str) return '';
-  return str.length > len ? str.substring(0, len - 2) + '..' : str;
-}
-
-function jumpTo(id) {
-  if (!tree || !tree.steps[id]) return;
-  const index = history.findIndex(h => h.stepId === id);
-  if (index !== -1) {
-    history = history.slice(0, index);
-  } else {
-    history = [];
-  }
-  current = id;
-  render();
-}
-
-function render() {
-  if (!tree) return;
-  renderFlow();
-  renderQuestion();
-}
-
-// ─── SVG renderer ─────────────────────────────────────────────────────────────
-function renderFlow() {
-  const { layout, edges, totalW, totalH } = buildLayout();
-  const svg = document.getElementById('flow-svg');
-  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
-  svg.setAttribute('width', totalW);
-  svg.setAttribute('height', totalH);
-  svg.style.minWidth = totalW + 'px';
-
-  const visitedSet = new Set(history.map(h => h.stepId));
-  const activeEdges = new Set(history.map(h => h.stepId + '→' + h.nextId));
-
-  let html = `<defs>
-    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M2 1L8 5L2 9" fill="none" stroke="#3a4a66" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </marker>
-    <marker id="arr-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M2 1L8 5L2 9" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </marker>
-    <marker id="arr-current" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M2 1L8 5L2 9" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </marker>
-  </defs>`;
-
-  edges.forEach(({ from, to, label }) => {
-    const fp = layout[from], tp = layout[to];
-    if (!fp || !tp) return;
-    const x1 = fp.x + fp.w / 2, y1 = fp.y + fp.h;
-    const x2 = tp.x + tp.w / 2, y2 = tp.y;
-    const my = (y1 + y2) / 2;
-    const key = from + '→' + to;
-    const isActive = activeEdges.has(key);
-    const isCurrent = from === current || to === current;
-    const stroke = isActive ? '#16a34a' : isCurrent ? '#16a34a' : '#dde1ea';
-    const marker = isActive ? 'arr-active' : isCurrent ? 'arr-current' : 'arr';
-    const sw = isActive ? 1.5 : 0.8;
-    const opacity = isActive ? 1 : (visitedSet.has(from) || to === current ? 0.6 : 0.3);
-    html += `<path d="M${x1} ${y1} C${x1} ${my+8},${x2} ${my-8},${x2} ${y2}" fill="none" stroke="${stroke}" stroke-width="${sw}" marker-end="url(#${marker})" opacity="${opacity}"/>`;
-    if (label) {
-      const lx = (x1 + x2) / 2 + 3, ly = my;
-      html += `<text x="${lx}" y="${ly}" font-family="IBM Plex Mono,monospace" font-size="9" fill="${isActive ? '#16a34a' : '#b0bcd4'}">${truncate(label, 7)}</text>`;
-    }
-  });
-
-  Object.entries(layout).forEach(([id, pos]) => {
-    const s = tree.steps[id];
-    if (!s) return;
-    const isCurrent = id === current;
-    const isVisited = visitedSet.has(id);
-    const isResult = s.diagnosis !== undefined;
-
-    let fill, stroke, textColor, sw;
-    if (isCurrent) {
-      fill = '#dcfce7'; stroke = '#16a34a'; textColor = '#16a34a'; sw = 1.5;
-    } else if (isVisited) {
-      fill = '#dcfce7'; stroke = '#16a34a'; textColor = '#16a34a'; sw = 1;
-    } else if (isResult) {
-      fill = '#fff7ed'; stroke = '#fdba74'; textColor = '#9a3412'; sw = 0.8;
-    } else {
-      fill = '#ffffff'; stroke = '#dde1ea'; textColor = '#a0aabb'; sw = 0.5;
-    }
-
-    const label = s.question ? truncate(s.question, 18) : (s.diagnosis ? truncate(s.diagnosis, 18) : id);
-    html += `<g class="flow-node" onclick="jumpTo('${id}')">
-      <rect x="${pos.x}" y="${pos.y}" width="${pos.w}" height="${pos.h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
-      <text x="${pos.x + pos.w / 2}" y="${pos.y + pos.h / 2}" text-anchor="middle" dominant-baseline="central" font-family="IBM Plex Sans,sans-serif" font-size="11" font-weight="${isCurrent ? 500 : 400}" fill="${textColor}">${label}</text>
-    </g>`;
-  });
-
-  svg.innerHTML = html;
-}
-
-// ─── Question panel ───────────────────────────────────────────────────────────
-function renderQuestion() {
-  const panel = document.getElementById('q-content');
-  const trail = document.getElementById('history-trail');
-  const step = tree.steps[current];
-  panel.innerHTML = '';
-
-  trail.innerHTML = '';
-  history.forEach((h, i) => {
-    const c = document.createElement('span');
-    c.className = 'crumb';
-    c.textContent = h.answer;
-    trail.appendChild(c);
-    const sep = document.createElement('span');
-    sep.className = 'crumb-sep';
-    sep.textContent = ' › ';
-    trail.appendChild(sep);
-  });
-  if (history.length) {
-    const cur = document.createElement('span');
-    cur.className = 'crumb active';
-    cur.textContent = current;
-    trail.appendChild(cur);
-  }
-
-  const sc = document.createElement('div');
-  sc.className = 'step-counter';
-  sc.textContent = `step_${String(history.length + 1).padStart(2, '0')}`;
-  panel.appendChild(sc);
-
-  if (step.question !== undefined) {
-    const q = document.createElement('div');
-    q.className = 'q-text';
-    q.textContent = step.question;
-    panel.appendChild(q);
-
-    const mainA = Object.entries(step.answers || {}).filter(([k]) => !NAV_KEYS.includes(k));
-    const navA  = Object.entries(step.answers || {}).filter(([k]) => NAV_KEYS.includes(k));
-
-    mainA.forEach(([ans, nid]) => {
-      const btn = document.createElement('button');
-      btn.className = 'ans-btn';
-      btn.textContent = ans;
-      btn.onclick = () => {
-        history.push({ stepId: current, answer: ans, nextId: nid });
-        current = nid;
-        render();
-      };
-      panel.appendChild(btn);
-    });
-
-    if (navA.length) {
-      const div = document.createElement('div');
-      div.className = 'divider';
-      panel.appendChild(div);
-      const row = document.createElement('div');
-      row.className = 'nav-row';
-      navA.forEach(([ans, nid]) => {
-        const btn = document.createElement('button');
-        btn.className = 'nav-btn';
-        btn.textContent = ans === 'back' ? '← back' : '↺ restart';
-        btn.onclick = () => {
-          if (ans === 'back') history.pop(); else history = [];
-          current = nid;
-          render();
-        };
-        row.appendChild(btn);
-      });
-      panel.appendChild(row);
-    }
-  } else {
-    saveSession(step);
-
-    const box = document.createElement('div');
-    box.className = 'result-box';
-
-    const ds = document.createElement('div');
-    ds.className = 'result-section';
-    ds.innerHTML = `<div class="result-label">diagnosis</div><div class="result-diag">${step.diagnosis || '—'}</div>`;
-    box.appendChild(ds);
-
-    if (step.action) {
-      const as = document.createElement('div');
-      as.className = 'result-section';
-      as.innerHTML = `<div class="result-label">recommended action</div><div class="result-action">${step.action}</div>`;
-      box.appendChild(as);
-    }
-    panel.appendChild(box);
-
-    const rst = document.createElement('button');
-    rst.className = 'restart-btn';
-    rst.textContent = '↺ restart troubleshooter';
-    rst.onclick = () => {
-      history = [];
-      current = tree.start;
-      render();
-    };
-    panel.appendChild(rst);
-  }
-}
-
-// ─── Gemini Core Engine with 503 Jitter Backoff & Fallback ─────────────────────
-let geminiOpen = false;
-let geminiMessages = [];
-let geminiReady = false;
-
-function toggleGemini() {
-  geminiOpen = !geminiOpen;
-  document.getElementById('gemini-drawer').classList.toggle('open', geminiOpen);
-  if (geminiOpen && !geminiReady) {
-    geminiReady = true;
-    geminiWelcome();
-  }
-  if (geminiOpen) setTimeout(() => document.getElementById('gem-input').focus(), 200);
-}
-
-function geminiWelcome() {
-  const step = tree ? tree.steps[current] : null;
-  const ctx = step?.question || step?.diagnosis || 'starting troubleshoot';
-  geminiAddMsg('ai', `Hi${currentUser ? ' ' + currentUser.name.split(' ')[0] : ''}! I'm your BMS AI assistant. You're currently at: "${ctx}". Ask me anything or use the quick buttons below.`);
-  renderQuickBtns();
-}
-
-function renderQuickBtns() {
-  const el = document.getElementById('gem-quick-btns');
-  if (!el) return;
-  el.innerHTML = '';
-  const btns = [
-    { label: '💡 Suggest next step', prompt: 'Based on my troubleshooting path so far, what should I check next and why?' },
-    { label: '📋 Summarize session', prompt: 'Summarize my troubleshooting session so far and what the findings indicate.' },
-    { label: '❓ Explain this step', prompt: 'Explain why the current step matters in BMS troubleshooting and what I should look for.' },
-    { label: '⚡ Common mistakes', prompt: 'What are the most common mistakes technicians make at this stage of BMS troubleshooting?' },
-  ];
-  btns.forEach(b => {
-    const btn = document.createElement('button');
-    btn.className = 'gem-quick-btn';
-    btn.textContent = b.label;
-    btn.onclick = () => geminiAsk(b.prompt);
-    el.appendChild(btn);
-  });
-}
-
-function geminiContext() {
-  const step = tree ? tree.steps[current] : null;
-  const pathStr = history.map(h => `Q: "${tree.steps[h.stepId]?.question || h.stepId}" → A: "${h.answer}"`).join('\n');
-  const resultInfo = step?.diagnosis ? `\nDiagnosis reached: "${step.diagnosis}"\nRecommended action: "${step.action || 'N/A'}"` : '';
-  return `You are an expert BMS (Building Management System) field technician assistant helping a technician diagnose an issue.
-
-Technician: ${currentUser?.name || 'Unknown'} (${currentUser?.email || 'N/A'})
-Current step question: "${step?.question || step?.diagnosis || current}"
-
-Troubleshooting path taken so far:
-${pathStr || '(just started — no steps taken yet)'}${resultInfo}
-
-Be concise and practical. Plain language. If listing steps, number them. Keep responses under 150 words unless detail is truly needed.`;
-}
-
-function calculateJitterDelay(retryCount) {
-  const initialDelayMs = 2000;
-  const exponentialDelay = initialDelayMs * Math.pow(2, retryCount);
-  return Math.random() * exponentialDelay;
-}
-
-async function geminiAsk(userText, retryCount = 0, useBackupModel = false) {
-  if (!userText.trim() && retryCount === 0) return;
-
-  let typingEl;
-  
-  if (retryCount === 0 && !useBackupModel) {
-    geminiAddMsg('user', userText);
-    document.getElementById('gem-input').value = '';
-    typingEl = geminiAddMsg('ai', '…thinking…');
-    typingEl.style.color = 'var(--text-dim)';
-    typingEl.style.fontStyle = 'italic';
-    geminiMessages[geminiMessages.length - 1].elReference = typingEl;
-  } else {
-    typingEl = geminiMessages[geminiMessages.length - 1].elReference;
-  }
-
-  const sendBtn = document.getElementById('gem-send');
-  if (sendBtn) sendBtn.disabled = true;
-
-  const contents = [];
-  contents.push({ role: 'user', parts: [{ text: geminiContext() }] });
-  contents.push({ role: 'model', parts: [{ text: 'Understood. Ready to assist with BMS troubleshooting.' }] });
-  
-  geminiMessages.slice(0, -1).forEach(m => {
-    contents.push({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.text }] });
-  });
-  contents.push({ role: 'user', parts: [{ text: userText }] });
-
-  try {
-    const res = await fetch("https://emkehdoofgaztuqmuyxw.supabase.co/functions/v1/ai-chat", {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SB_KEY}`
-      },
-      body: JSON.stringify({
-        contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 400 },
-        modelFallback: useBackupModel 
-      })
-    });
-
-    const data = await res.json();
-
-    // Catch Server 503 (High Demand)
-    if (res.status === 503) {
-      const maxRetries = 3;
-      if (retryCount < maxRetries) {
-        const delay = calculateJitterDelay(retryCount);
-        typingEl.textContent = `…high demand, retrying in ${Math.round(delay/1000)}s…`;
-        await new Promise(resolve => setTimeout(resolve, delay));
-        return await geminiAsk(userText, retryCount + 1, useBackupModel);
-      } 
-      
-      if (!useBackupModel) {
-        typingEl.textContent = `…switching to flash server…`;
-        return await geminiAsk(userText, 0, true);
-      }
-    }
-
-    if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
-    
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-    typingEl.textContent = reply;
-    typingEl.style.color = '';
-    typingEl.style.fontStyle = '';
-    geminiMessages[geminiMessages.length - 1].text = reply;
-
-  } catch (e) {
-    console.error('[Gemini] Error:', e);
-    typingEl.textContent = '⚠ Error: ' + e.message;
-    typingEl.style.color = 'var(--red)';
-    typingEl.style.fontStyle = '';
-  }
-
-  if (sendBtn) sendBtn.disabled = false;
-}
-
-function geminiSend() {
-  const val = document.getElementById('gem-input').value.trim();
-  if (val) geminiAsk(val);
-}
-
-function geminiAddMsg(role, text) {
-  const el = document.createElement('div');
-  el.className = `gem-msg ${role}`;
-  el.textContent = text;
-  const container = document.getElementById('gem-messages');
-  if (container) {
-    container.appendChild(el);
-    container.scrollTop = container.scrollHeight;
-  }
-  geminiMessages.push({ role, text });
-  return el;
-}
-
-// Global window layout listeners
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    if (!document.getElementById('login-overlay').classList.contains('hidden')) {
-      submitLogin();
-    } else if (document.activeElement === document.getElementById('gem-input')) {
-      e.preventDefault();
-      geminiSend();
-    }
-  }
-});
-</script>
-</body>
-</html>
+//
