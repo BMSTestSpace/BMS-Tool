@@ -975,8 +975,7 @@ function render() {
   if (typeof geminiOpen !== 'undefined' && geminiOpen && geminiReady) renderQuickBtns();
 }
 // ─── Gemini AI ────────────────────────────────────────────────────────────────
-const GEMINI_KEY = "AIzaSyAIrT9XPMKa89kaUmjrrlGEoJYCqQeGLXY";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
+const GEMINI_URL = "https://emkehdoofgaztuqmuyxw.supabase.co/functions/v1/ai-chat";
 let geminiOpen = false;
 let geminiMessages = [];
 let geminiReady = false;
@@ -1054,9 +1053,12 @@ async function geminiAsk(userText) {
   contents.push({ role: 'user', parts: [{ text: userText }] });
 
   try {
-    const res = await fetch(GEMINI_URL, {
+    const res = await fetch("https://emkehdoofgaztuqmuyxw.supabase.co/functions/v1/ai-chat", {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer YOUR_SUPABASE_ANON_KEY`
+      },
       body: JSON.stringify({
         contents,
         generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
